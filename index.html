@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Plataforma Multimedia HM-BC Comercial</title>
+    <script src="https://meet.jit.si/external_api.js"></script>
     <style>
         :root {
             --bg-primary: #000c14;
@@ -71,7 +72,7 @@
             border-left: 4px solid var(--accent-gold);
         }
 
-        /* Contenedor Principal de Módulos */
+        /* Contenedor Principal */
         #main-content {
             flex-grow: 1;
             display: flex;
@@ -109,7 +110,7 @@
         #counter { font-size: 1.3rem; font-weight: bold; color: var(--accent-gold); background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 8px; border: 1px solid var(--accent-gold); }
         #media-timer { font-size: 1.3rem; font-weight: bold; color: var(--accent-cyan); font-family: monospace; background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 8px; border: 1px solid var(--accent-cyan); min-width: 90px; text-align: center; }
 
-        /* Vistas de Módulos individuales */
+        /* Módulos */
         .app-module {
             display: none;
             flex-grow: 1;
@@ -119,7 +120,6 @@
         }
         .app-module.active { display: flex; flex-direction: column; }
 
-        /* Estilo de Paneles y Tarjetas */
         .card-panel {
             background: var(--bg-card);
             border: 1px solid rgba(0, 210, 255, 0.2);
@@ -130,7 +130,7 @@
         }
         h2.module-title { margin-top: 0; color: var(--accent-cyan); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
 
-        /* Formularios del Panel Administrativo */
+        /* Formularios */
         .form-group {
             margin-bottom: 15px;
             display: flex;
@@ -149,7 +149,7 @@
         }
         .form-control:focus { border-color: var(--accent-cyan); box-shadow: 0 0 5px rgba(0,210,255,0.5); }
 
-        /* Visor de Cartelera Central Integrado */
+        /* Visor de Cartelera */
         #viewer-container {
             flex-grow: 1; background: #000; position: relative; overflow: hidden;
             display: flex; justify-content: center; align-items: center; border-radius: 12px;
@@ -157,25 +157,26 @@
         #media-content { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
         #media-content iframe, #media-content img { max-width: 100%; max-height: 100%; width: 100%; height: 100%; border: none; display: block; object-fit: contain; transition: transform 0.3s ease; }
 
-        /* Bloqueo Inicial de Seguridad Multimedia */
+        /* Bloqueo Inicial */
         #overlay-inicio { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 100; display: flex; justify-content: center; align-items: center; border-radius: 12px; }
         #btn-play { background: var(--accent-gold); color: #000; border: none; padding: 18px 40px; font-size: 1.6rem; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px var(--accent-gold); }
 
-        /* Listas de Publicidad y Enlaces Activos */
+        /* Vitrina de Publicidad */
         .ad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 15px; }
         .ad-card { background: var(--bg-sidebar); border: 2px solid var(--accent-gold); border-radius: 10px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
         .ad-card h4 { margin: 0; color: #fff; font-size: 1.1rem; }
         .ad-card p { margin: 0; font-size: 0.85rem; color: var(--text-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
 
-        /* Herramientas de Grabación Remota */
+        /* Grabador */
         .recording-zone { display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 20px; background: var(--bg-sidebar); border-radius: 10px; border: 1px dashed var(--accent-cyan); }
         #webcam-preview { width: 100%; max-width: 480px; height: auto; background: #000; border-radius: 8px; transform: scaleX(-1); }
         .recording-status { font-weight: bold; color: #ff4d4d; animation: blink 1s infinite alternate; display: none; }
 
-        /* Animación Ecualizador */
+        /* Filtro de Muro de Acceso Aula */
+        .gate-container { max-width: 450px; margin: 40px auto; text-align: center; padding: 30px; background: var(--bg-sidebar); border: 2px solid var(--accent-gold); border-radius: 12px; box-shadow: 0 0 20px rgba(212,175,55,0.2); }
+
         @keyframes sonando { 0% { transform: scaleY(0.3); } 100% { transform: scaleY(1.3); } }
         .barrita { width: 6px; height: 35px; background: var(--accent-gold); animation: sonando 0.5s infinite alternate ease-in-out; }
-
         @keyframes blink { 0% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
@@ -197,7 +198,7 @@
             </nav>
         </div>
         <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; font-size: 0.8rem; color: var(--text-muted);">
-            HM-BC Platform v2.0
+            HM-BC Platform v2.5
         </div>
     </div>
 
@@ -239,7 +240,7 @@
         <div id="mod-grabador" class="app-module">
             <div class="card-panel">
                 <h2 class="module-title">Grabación y Generación de Contenido Inmediato</h2>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Graba audio de voz (Podcasts) o secuencias de vídeo con tu cámara web. El software empaqueta el contenido y lo almacena de inmediato en tu Drive Corporativo sin dependencias externas.</p>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Graba podcasts de voz o secuencias de vídeo con tu cámara web. El software guarda el archivo de inmediato en tu Google Drive Corporativo.</p>
                 
                 <div class="recording-zone">
                     <span class="recording-status" id="rec-status">🔴 GRABANDO EN VIVO</span>
@@ -252,7 +253,7 @@
                     </div>
                     
                     <div id="recording-preview-box" style="display:none; width: 100%; text-align: center; margin-top: 15px;">
-                        <h4 style="color: var(--accent-gold);">Previsualización de la Captura Realizada</h4>
+                        <h4 style="color: var(--accent-gold);">Previsualización de la Captura</h4>
                         <audio id="audio-playback" controls style="display:none; margin: 10px auto;"></audio>
                         <video id="video-playback" controls style="display:none; width:100%; max-width:400px; margin:10px auto; border-radius:8px;"></video>
                         <br>
@@ -263,24 +264,34 @@
         </div>
 
         <div id="mod-aula" class="app-module">
-            <div class="card-panel" style="flex-grow: 1; display: flex; flex-direction: column;">
-                <h2 class="module-title">Aula Virtual de Clases y Talleres en Vivo</h2>
+            <div id="aula-gate" class="gate-container">
+                <h3 style="color: var(--accent-gold); margin-top: 0;">🔐 Acceso Exclusivo a Clientes</h3>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Esta sala es privada. Ingrese su Correo Electrónico o WhatsApp registrado para validar su acceso.</p>
+                <div class="form-group" style="text-align: left;">
+                    <label>Identificador del Alumno</label>
+                    <input type="text" id="student-auth-input" class="form-control" placeholder="ejemplo@gmail.com o 4241234567">
+                </div>
+                <button class="btn-control" style="width: 100%; margin-top: 10px;" onclick="validarAccesoAula()">Validar e Ingresar a Clase</button>
+            </div>
+
+            <div id="aula-sala" class="card-panel" style="display: none; flex-grow: 1; flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 class="module-title" style="margin: 0;">Aula Virtual Activa</h2>
+                    <span id="student-welcome-badge" style="color: var(--accent-gold); font-weight: bold;"></span>
+                </div>
                 <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <input type="text" id="room-id-input" class="form-control" style="width: 300px;" value="Clase_Agencia_Luis_Mendoza" placeholder="Nombre de la Sala">
-                    <button class="btn-control" onclick="conectarAulaVirtual()">🚀 Aperturar / Unirse al Aula</button>
+                    <input type="text" id="room-id-input" class="form-control" style="width: 300px;" value="Clase_Privada_HM_BC" placeholder="Nombre de la Sala">
+                    <button class="btn-control" onclick="conectarAulaVirtual()">🚀 Aperturar / Reconectar Canal</button>
                 </div>
-                <div id="jitsi-container" style="flex-grow: 1; background: #000; border-radius: 8px; overflow: hidden; min-height: 450px;">
-                    <div style="text-align: center; color: var(--text-muted); padding: 100px;">El sistema cargará el aula interactiva encriptada WebRTC aquí de forma nativa.</div>
-                </div>
+                <div id="jitsi-container" style="flex-grow: 1; background: #000; border-radius: 8px; overflow: hidden; min-height: 480px;"></div>
             </div>
         </div>
 
         <div id="mod-publicidad" class="app-module">
             <div class="card-panel">
                 <h2 class="module-title">Enlaces Comerciales y Páginas de Clientes Patrocinados</h2>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Los clientes pueden suministrar sus enlaces web para promocionar productos o servicios interactivos. Al hacer clic, se despliega la vitrina interactiva directa.</p>
-                <div class="ad-grid" id="publicidad-grid-container">
-                    </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Catálogo interactivo directo de las marcas patrocinantes de la agencia.</p>
+                <div class="ad-grid" id="publicidad-grid-container"></div>
             </div>
             
             <div class="card-panel" id="ad-viewer-wrapper" style="display: none; flex-grow: 1; min-height: 400px;">
@@ -315,13 +326,18 @@
                         </div>
                     </div>
 
-                    <h3 style="color: var(--accent-cyan); margin-top: 25px; font-size: 1.1rem;">Gestión de Enlaces Publicitarios (Links para Rotación en Pantalla)</h3>
-                    <div id="admin-links-rows" style="display: flex; flex-direction: column; gap: 10px;">
-                        </div>
+                    <h3 style="color: var(--accent-gold); margin-top: 25px; font-size: 1.1rem;">👥 Control de Acceso: Alumnos Autorizados (Aula Virtual)</h3>
+                    <div class="form-group">
+                        <label>Pega los correos o números de WhatsApp permitidos (Uno por línea)</label>
+                        <textarea id="adm-estudiantes" class="form-control" rows="6" placeholder="alumno1@gmail.com&#10;584247112233&#10;luis.mendoza@hotmail.com" style="font-family: monospace; resize: vertical;"></textarea>
+                    </div>
+
+                    <h3 style="color: var(--accent-cyan); margin-top: 25px; font-size: 1.1rem;">Gestión de Enlaces Publicitarios (Links para Rotación)</h3>
+                    <div id="admin-links-rows" style="display: flex; flex-direction: column; gap: 10px;"></div>
                     <button type="button" class="btn-control" style="margin-top: 10px; font-size: 0.85rem;" onclick="addAdLinkRow('', '')">+ Añadir Enlace Publicitario</button>
 
                     <div style="margin-top: 30px; text-align: right;">
-                        <button type="submit" class="btn-control" style="border-color: #00ff66; color: #00ff66; padding: 10px 25px;">💾 Guardar Configuración en Base de Datos</button>
+                        <button type="submit" class="btn-control" style="border-color: #00ff66; color: #00ff66; padding: 10px 25px;">💾 Guardar Todo en Google Drive</button>
                     </div>
                 </form>
             </div>
@@ -330,14 +346,17 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN DE RUTA AL BACKEND DE GOOGLE APPS SCRIPT
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby2eTP6Hfb4izWesLgxPku250qbyJITDGL2FvnU--UPD5NzHQmRbUkK6yhhYHlT6Re5CQ/exec"; 
+        // Servidor Jitsi alternativo de la comunidad para esquivar restricciones corporativas de Auth0
+        const JITSI_SERVER = "meet.ffmuc.net"; 
+        
         const TIEMPO_IMAGEN = 5000; 
         const TIEMPO_VIDEO_DEFECTO = 30000; 
         const TIEMPO_AUDIO_RESPALDO = 15000; 
 
         let archivos = []; 
         let configComercial = {}; 
+        let listaEstudiantesPermitidos = []; 
         let indexActual = 0; 
         let reproductorTimer = null; 
         let clockTimer = null; 
@@ -346,7 +365,8 @@
         let sistemaIniciado = false; 
         let esPausado = false; 
         let scaleActual = 1.20; 
-        
+        let jitsiAPI = null;
+
         let mediaRecorder = null;
         let recordedChunks = [];
         let typeRecording = "";
@@ -354,7 +374,6 @@
 
         const audioHardware = document.getElementById('global-audio');
 
-        // Reloj en tiempo real de Venezuela
         setInterval(() => { 
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('es-VE'); 
         }, 1000); 
@@ -366,7 +385,6 @@
             return `${m}:${s}`; 
         }
 
-        // Intercambiar de módulos en el Dashboard
         function switchModule(moduleName, element) {
             document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
             element.classList.add('active');
@@ -388,7 +406,7 @@
                     initWebcam();
                 } else if(moduleName === 'aula') {
                     document.getElementById('mod-aula').classList.add('active');
-                    document.getElementById('header-app-title').innerText = "AULA VIRTUAL ACTIVA";
+                    document.getElementById('header-app-title').innerText = "AULA VIRTUAL EXCLUSIVA";
                 } else if(moduleName === 'publicidad') {
                     document.getElementById('mod-publicidad').classList.add('active');
                     document.getElementById('header-app-title').innerText = "VITRINA COMERCIAL DE ENLACES";
@@ -400,43 +418,31 @@
             }
         }
 
-        /* ==========================================
-           ACTUALIZACIÓN CRUCIAL: precargarLista INTELIGENTE
-           ========================================== */
+        // PRECARGA INTELIGENTE MEJORADA CON LISTA DE ALUMNOS
         async function precargarLista() {
             try {
                 const res = await fetch(SCRIPT_URL); 
                 const data = await res.json();
                 
-                // Evalúa la estructura del JSON para evitar congelamientos en 0/0
                 if (data && data.archivos) {
-                    // Formato comercial avanzado
                     archivos = data.archivos; 
                     configComercial = data.config || {}; 
-                } else if (Array.isArray(data)) {
-                    // Formato plano antiguo (Respaldo por si acaso)
-                    archivos = data; 
-                    configComercial = { 
-                        nombre: "AGENCIA LUIS MENDOZA", 
-                        telefono: "+58 424-7000000", 
-                        instagram: "@agencia", 
-                        facebook: "agencia.fb", 
-                        adLinks: [] 
-                    };
-                } else {
-                    throw new Error("Estructura de base de datos irreconocible.");
+                    listaEstudiantesPermitidos = data.estudiantes || [];
                 }
                 
-                // Renderizar los títulos en la UI
                 document.getElementById('header-app-title').innerText = configComercial.nombre || "PLATAFORMA HM-BC"; 
                 const brandTitle = document.getElementById('brand-title');
                 if (brandTitle) brandTitle.innerText = (configComercial.nombre || "AGENCIA MULTIMEDIA").toUpperCase();
                 
-                // Cargar valores del formulario administrativo
                 if(document.getElementById('adm-nombre')) document.getElementById('adm-nombre').value = configComercial.nombre || "";
                 if(document.getElementById('adm-telefono')) document.getElementById('adm-telefono').value = configComercial.telefono || "";
                 if(document.getElementById('adm-instagram')) document.getElementById('adm-instagram').value = configComercial.instagram || "";
                 if(document.getElementById('adm-facebook')) document.getElementById('adm-facebook').value = configComercial.facebook || "";
+                
+                // Cargar lista de alumnos autorizados en el campo de texto administrativo
+                if(document.getElementById('adm-estudiantes')) {
+                    document.getElementById('adm-estudiantes').value = listaEstudiantesPermitidos.join("\n");
+                }
                 
                 const linksContainer = document.getElementById('admin-links-rows');
                 if (linksContainer) {
@@ -448,13 +454,67 @@
                 
                 document.getElementById('msg-espera').innerText = "Medios listos en memoria. Presione el botón amarillo."; 
             } catch(e) {
-                console.error("Error al conectar con Drive. Reintentando...", e);
                 document.getElementById('msg-espera').innerText = "Buscando base de datos en Drive...";
                 setTimeout(precargarLista, 3000); 
             }
         }
 
-        /* --- LÓGICA DEL REPRODUCTOR DE CARTELERA --- */
+        /* --- FILTRO DE CONTROL DE ACCESO PARA EL AULA --- */
+        function validarAccesoAula() {
+            const inputVal = document.getElementById('student-auth-input').value.trim().toLowerCase();
+            if(!inputVal) {
+                alert("Por favor ingrese una credencial válida.");
+                return;
+            }
+
+            // Normalización para comparar de manera flexible
+            const encontrado = listaEstudiantesPermitidos.some(u => u.trim().toLowerCase() === inputVal);
+
+            if(encontrado) {
+                document.getElementById('aula-gate').style.display = "none";
+                const salaView = document.getElementById('aula-sala');
+                salaView.style.display = "flex";
+                document.getElementById('student-welcome-badge').innerText = `👤 Alumno Autorizado: ${inputVal}`;
+                conectarAulaVirtual(); // Auto-conectar sala de forma segura
+            } else {
+                alert("⛔ Acceso denegado. Este identificador (WhatsApp o Correo) no figura en la lista de alumnos inscritos en este taller.");
+            }
+        }
+
+        /* --- CONEXIÓN AVANZADA WEBRTC CON JITSI (ANTIBLOQUEOS) --- */
+        function conectarAulaVirtual() { 
+            const roomName = document.getElementById('room-id-input').value.replace(/\s+/g, '_');
+            const container = document.getElementById('jitsi-container');
+            container.innerHTML = ""; // Limpiar instancias previas
+
+            // Destruir API previa para refrescar memoria y evitar fugas
+            if(jitsiAPI) { jitsiAPI.dispose(); }
+
+            // Configuración nativa usando la API externa en lugar de un iframe crudo
+            const options = {
+                roomName: roomName,
+                width: '100%',
+                height: 520,
+                parentNode: container,
+                lang: 'es',
+                configOverwrite: {
+                    startWithAudioMuted: true,
+                    startWithVideoMuted: true,
+                    prejoinPageEnabled: false, // Quita pantallas intermedias molestas
+                    disableThirdPartyRequests: true
+                },
+                interfaceConfigOverwrite: {
+                    FILM_STRIP_MAX_HEIGHT: 120,
+                    SHOW_JITSI_WATERMARK: false,
+                    DISABLE_DOMINANT_SPEAKER_INDICATOR: false
+                }
+            };
+
+            // Ejecuta la llamada apuntando al servidor libre de Auth0
+            jitsiAPI = new JitsiMeetExternalAPI(JITSI_SERVER, options);
+        }
+
+        /* --- LÓGICA REPRODUCTOR CARTELERA --- */
         function iniciarSistema() { 
             if (archivos.length === 0) return; 
             sistemaIniciado = true; 
@@ -585,7 +645,7 @@
                 }, 1000); 
                 reproductorTimer = setTimeout(siguienteMedia, TIEMPO_IMAGEN); 
             }
-            ajustarEscalaVisual(); 
+            ajustarEscvalVisual(); 
         }
 
         function siguienteMedia() { 
@@ -631,37 +691,31 @@
             try {
                 const res = await fetch(SCRIPT_URL); 
                 const d = await res.json();
-                if (d && d.archivos && d.archivos.length > 0) {
-                    archivos = d.archivos;
-                } else if (Array.isArray(d)) {
-                    archivos = d;
-                }
-            } catch(e) { console.log("Sincronización silenciosa omitida."); } 
+                if (d && d.archivos) archivos = d.archivos;
+            } catch(e) { console.log("Sincronización omitida."); } 
         }
 
-        /* --- MÓDULO 2: GRABADOR HARDWARE NATIVO --- */
+        /* --- ESTUDIO GRABADOR NATIVO --- */
         async function initWebcam() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true }); 
                 document.getElementById('webcam-preview').srcObject = stream;
             } catch (err) {
-                alert("Por favor habilita los permisos de micrófono y cámara web.");
+                alert("Por favor habilita los permisos de multimedia.");
             }
         }
 
         function startRecording(type) {
-            typeRecording = type;
-            recordedChunks = [];
+            typeRecording = type; recordedChunks = [];
             const stream = document.getElementById('webcam-preview').srcObject;
             if(!stream) return;
 
             let options = { mimeType: type === 'audio' ? 'audio/webm' : 'video/webm;codecs=vp8' };
             mediaRecorder = new MediaRecorder(stream, options); 
-            
             mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
             mediaRecorder.onstop = processStopRecording;
-
             mediaRecorder.start();
+
             document.getElementById('rec-status').style.display = 'block';
             document.getElementById('btn-stop-rec').disabled = false;
             document.getElementById('btn-start-audio').disabled = true;
@@ -679,79 +733,56 @@
         function processStopRecording() {
             blobGrabado = new Blob(recordedChunks, { type: typeRecording === 'audio' ? 'audio/mp3' : 'video/mp4' });
             const url = URL.createObjectURL(blobGrabado);
-            
             document.getElementById('recording-preview-box').style.display = 'block';
+            
             const audioPlayback = document.getElementById('audio-playback');
             const videoPlayback = document.getElementById('video-playback');
-
             if(typeRecording === 'audio') {
-                videoPlayback.style.display = 'none';
-                audioPlayback.style.display = 'block';
-                audioPlayback.src = url; 
+                videoPlayback.style.display = 'none'; audioPlayback.style.display = 'block'; audioPlayback.src = url; 
             } else {
-                audioPlayback.style.display = 'none';
-                videoPlayback.style.display = 'block';
-                videoPlayback.src = url; 
+                audioPlayback.style.display = 'none'; videoPlayback.style.display = 'block'; videoPlayback.src = url; 
             }
         }
 
         function uploadCapturedFile() {
             if(!blobGrabado) return;
-            
             const reader = new FileReader();
             reader.readAsDataURL(blobGrabado); 
             reader.onloadend = async function() {
                 const base64Data = reader.result;
-                const extension = typeRecording === 'audio' ? 'mp3' : 'mp4';
-                const nameFile = `Grabacion_${Date.now()}.${extension}`; 
+                const ext = typeRecording === 'audio' ? 'mp3' : 'mp4';
+                const nameFile = `Grabacion_${Date.now()}.${ext}`; 
 
-                alert("Subiendo archivo directamente a Google Drive, por favor espere...");
-
+                alert("Guardando en la base de datos de Drive...");
                 try {
                     const response = await fetch(SCRIPT_URL, {
                         method: 'POST',
-                        body: JSON.stringify({
-                            action: "uploadFile", 
-                            fileName: nameFile,
-                            fileData: base64Data
-                        })
+                        body: JSON.stringify({ action: "uploadFile", fileName: nameFile, fileData: base64Data })
                     });
                     const resJson = await response.json();
                     if(resJson.success) {
-                        alert(`¡Sincronizado! Guardado en Drive con ID: ${resJson.fileId}`);
+                        alert("¡Sincronizado con éxito!");
                         document.getElementById('recording-preview-box').style.display = 'none';
                         refrescarListaEnSegundoPlano();
-                    } else { alert("Error al subir el archivo."); }
-                } catch(err) { alert("Error de conexión."); }
+                    }
+                } catch(err) { alert("Error de comunicación."); }
             };
         }
 
-        /* --- MÓDULO 3: AULA VIRTUAL --- */
-        function conectarAulaVirtual() { 
-            const roomName = document.getElementById('room-id-input').value.replace(/\s+/g, '_');
-            const container = document.getElementById('jitsi-container');
-            container.innerHTML = `<iframe src="https://meet.jit.si/${roomName}#config.startWithAudioMuted=true&config.startWithVideoMuted=true" allow="camera; microphone; fullscreen; display-capture; teamviewer" style="width:100%; height:500px; border:none;"></iframe>`; 
-        }
-
-        /* --- MÓDULO 4: VITRINA DE PUBLICIDAD INTERACTIVA --- */
+        /* --- VITRINA DE PUBLICIDAD --- */
         function renderPublicidadGrid() { 
             const container = document.getElementById('publicidad-grid-container');
             container.innerHTML = "";
-            
             if(!configComercial.adLinks || configComercial.adLinks.length === 0) {
-                container.innerHTML = `<p style="color:var(--text-muted);">No existen enlaces de publicidad cargados en el sistema.</p>`;
+                container.innerHTML = `<p style="color:var(--text-muted);">No existen enlaces comerciales configurados.</p>`;
                 return;
             }
-
             configComercial.adLinks.forEach(ad => { 
                 const card = document.createElement('div');
                 card.className = "ad-card";
                 card.innerHTML = `
-                    <div>
-                        <h4>${ad.title}</h4>
-                        <p>${ad.url}</p>
-                    </div>
-                    <button class="btn-control" style="font-size:0.8rem; width:100%;" onclick="openAdViewer('${ad.url}')">Ver Catálogo/Web</button>
+                    <div><h4>${ad.title}</h4><p>${ad.url}</p></div>
+                    <button class="btn-control" style="font-size:0.8rem; width:100%;" onclick="openAdViewer('${ad.url}')">Ver Sitio</button>
                 `; 
                 container.appendChild(card);
             });
@@ -767,17 +798,15 @@
             document.getElementById('ad-iframe-browser').src = "";
         }
 
-        /* --- MÓDULO 5: RECOPILACIÓN Y GESTIÓN ADMINISTRATIVA --- */
+        /* --- PANEL ADMINISTRATIVO --- */
         function addAdLinkRow(title = "", url = "") { 
             const container = document.getElementById('admin-links-rows');
             if(!container) return;
             const row = document.createElement('div');
-            row.className = "ad-link-row";
-            row.style.display = "flex";
-            row.style.gap = "10px";
+            row.className = "ad-link-row"; row.style.display = "flex"; row.style.gap = "10px";
             row.innerHTML = `
                 <input type="text" placeholder="Título Comercial" class="form-control row-title" style="flex: 1;" value="${title}" required>
-                <input type="url" placeholder="https://ejemplo.com/catalogo" class="form-control row-url" style="flex: 2;" value="${url}" required>
+                <input type="url" placeholder="https://..." class="form-control row-url" style="flex: 2;" value="${url}" required>
                 <button type="button" class="btn-control btn-danger" onclick="this.parentElement.remove()" style="padding: 10px;">✖</button>
             `; 
             container.appendChild(row);
@@ -785,39 +814,33 @@
 
         async function saveAdminConfig(event) {
             event.preventDefault();
-            
             const nombre = document.getElementById('adm-nombre').value;
             const telefono = document.getElementById('adm-telefono').value;
             const instagram = document.getElementById('adm-instagram').value;
             const facebook = document.getElementById('adm-facebook').value;
             
+            // Recopilar lista estructurada de alumnos
+            const txtEstudiantes = document.getElementById('adm-estudiantes').value;
+            const estudiantesArr = txtEstudiantes.split("\n").map(line => line.trim()).filter(line => line.length > 0);
+            
             const adLinks = [];
             document.querySelectorAll('.ad-link-row').forEach(row => {
-                const title = row.querySelector('.row-title').value;
-                const url = row.querySelector('.row-url').value;
-                adLinks.push({ title: title, url: url }); 
+                adLinks.push({ title: row.querySelector('.row-title').value, url: row.querySelector('.row-url').value }); 
             });
 
-            alert("Resguardando configuraciones comerciales en la base de datos de Google...");
-
+            alert("Escribiendo cambios en la nube comercial...");
             try {
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({
-                        action: "saveConfig", 
-                        nombre: nombre,
-                        telefono: telefono,
-                        instagram: instagram,
-                        facebook: facebook,
-                        adLinks: adLinks 
+                        action: "saveConfig", nombre: nombre, telefono: telefono,
+                        instagram: instagram, facebook: facebook, adLinks: adLinks,
+                        estudiantes: estudiantesArr // Enviamos los datos
                     })
                 });
                 const resJson = await response.json();
-                if(resJson.success) {
-                    alert("¡Configuración guardada exitosamente!");
-                    location.reload(); 
-                } else { alert("Error al guardar ajustes."); }
-            } catch(e) { alert("Error crítico de comunicación."); }
+                if(resJson.success) { alert("¡Ajustes y registros guardados!"); location.reload(); }
+            } catch(e) { alert("Error crítico."); }
         }
 
         window.onload = precargarLista; 
