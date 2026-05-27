@@ -374,7 +374,7 @@
         // Cargar Base de datos inicial (Medios + Ajustes comerciales) [cite: 193]
         async function precargarLista() {
             try {
-                const res = await fetch(SCRIPT_URL); // [cite: 193]
+                const res = await fetch(SCRIPT_URL, { method: 'GET', redirect: 'follow' });
                 const data = await res.json();
                 archivos = data.archivos; // [cite: 194]
                 configComercial = data.config; // Trae datos guardados por el admin 
