@@ -135,7 +135,7 @@
         }
         h2.module-title { margin-top: 0; color: var(--accent-cyan); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
 
-        /* Formularios del Panel Administrativo */
+        /* Formularios */
         .form-group {
             margin-bottom: 15px;
             display: flex;
@@ -269,13 +269,29 @@
 
         <div id="mod-aula" class="app-module">
             <div class="card-panel" style="flex-grow: 1; display: flex; flex-direction: column;">
-                <h2 class="module-title">Aula Virtual de Clases y Talleres en Vivo</h2>
-                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <input type="text" id="room-id-input" class="form-control" style="width: 300px;" value="Clase_Agencia_Luis_Mendoza" placeholder="Nombre de la Sala">
-                    <button class="btn-control" onclick="conectarAulaVirtual()">🚀 Aperturar / Unirse al Aula</button>
+                <h2 class="module-title">Aula Virtual - Control de Acceso Vinculado a Excel</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+                    Para ingresar al aula interactiva, el estudiante debe estar registrado en el Google Form correspondiente. Ingrese su correo oficial para validar sus datos contra la hoja de cálculo.
+                </p>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; background: var(--bg-sidebar); padding: 15px; border-radius: 8px; border: 1px solid rgba(0, 210, 255, 0.2);">
+                    <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+                        <label>Nombre de la Sala / Taller</label>
+                        <input type="text" id="room-id-input" class="form-control" value="Clase_Agencia_Luis_Mendoza" placeholder="Nombre de la Sala">
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 250px; margin-bottom: 0;">
+                        <label>Correo Electrónico Registrado</label>
+                        <input type="email" id="student-id-input" class="form-control" placeholder="estudiante@correo.com">
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <button class="btn-control" style="border-color: var(--accent-cyan); color: var(--accent-cyan); height: 42px;" onclick="conectarAulaVirtual()">🔒 Validar e Ingresar</button>
+                    </div>
                 </div>
-                <div id="jitsi-container" style="flex-grow: 1; background: #000; border-radius: 8px; overflow: hidden; min-height: 450px;">
-                    <div style="text-align: center; color: var(--text-muted); padding: 100px;">El sistema cargará el aula interactiva encriptada WebRTC aquí de forma nativa.</div>
+
+                <div id="jitsi-container" style="flex-grow: 1; background: #000; border-radius: 8px; overflow: hidden; min-height: 450px; display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; color: var(--text-muted); padding: 50px;" id="jitsi-placeholder-msg">
+                        El sistema cargará el aula interactiva WebRTC aquí una vez verificadas tus credenciales de Google Sheets.
+                    </div>
                 </div>
             </div>
         </div>
@@ -333,7 +349,7 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN DE RUTAS INTERNAS Y SERVIDORES
+        // CONFIGURACIÓN DE RUTAS INTERNES Y SERVIDORES
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby2eTP6Hfb4izWesLgxPku250qbyJITDGL2FvnU--UPD5NzHQmRbUkK6yhhYHlT6Re5CQ/exec";
         const JITSI_SERVER = "meet.ffmuc.net"; // Servidor comunitario libre asignado por requerimiento
         const TIEMPO_IMAGEN = 5000;
@@ -405,7 +421,7 @@
             }
         }
 
-        // Cargar Base de datos inicial (Medios + Ajustes comerciales vinculados a la hoja de cálculo)
+        // Cargar Base de datos inicial (Medios + Ajustes comerciales)
         async function precargarLista() {
             try {
                 const res = await fetch(SCRIPT_URL);
@@ -616,13 +632,13 @@
             } catch(e) { console.log("Refresco silencioso fallido"); }
         }
 
-        /* --- MÓDULO 2: GRABADOR HARDWARE NATIVO (MediaRecorder API) --- */
+        /* --- MÓDULO 2: GRABADOR HARDWARE NATIVO --- */
         async function initWebcam() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
                 document.getElementById('webcam-preview').srcObject = stream;
             } catch (err) {
-                alert("Por favor habilita los permisos de micrófono y cámara web para usar este módulo comercial.");
+                alert("Por favor habilita los permisos de micrófono y cámara web para usar este módulo.");
             }
         }
 
@@ -676,13 +692,13 @@
             if(!blobGrabado) return;
             
             const reader = new FileReader();
-            reader.readAsDataURL(blobGrabado); // Convierte a Base64 para enviar via POST
+            reader.readAsDataURL(blobGrabado);
             reader.onloadend = async function() {
                 const base64Data = reader.result;
                 const extension = typeRecording === 'audio' ? 'mp3' : 'mp4';
                 const nameFile = `Grabacion_${Date.now()}.${extension}`;
 
-                alert("Subiendo archivo a Google Drive de forma directa, espere confirmación...");
+                alert("Subiendo archivo a Google Drive, espere confirmación...");
 
                 try {
                     const response = await fetch(SCRIPT_URL, {
@@ -695,7 +711,7 @@
                     });
                     const resJson = await response.json();
                     if(resJson.success) {
-                        alert(`¡Éxito comercial! Archivo guardado en Drive con ID: ${resJson.fileId}`);
+                        alert(`¡Éxito! Archivo guardado en Drive con ID: ${resJson.fileId}`);
                         document.getElementById('recording-preview-box').style.display = 'none';
                         refrescarListaEnSegundoPlano();
                     } else { alert("Error al subir archivo."); }
@@ -703,12 +719,59 @@
             };
         }
 
-        /* --- MÓDULO 3: AULA VIRTUAL (Integración Jitsi Meet con Servidor Seguro Libre) --- */
-        function conectarAulaVirtual() { 
+        /* --- MÓDULO 3: AULA VIRTUAL CON FILTRO DE EXCEL --- */
+        async function conectarAulaVirtual() { 
             const roomName = document.getElementById('room-id-input').value.replace(/\s+/g, '_');
+            const studentEmail = document.getElementById('student-id-input').value.trim();
             const container = document.getElementById('jitsi-container');
-            // Incrustación mediante un iframe usando la constante JITSI_SERVER apuntando al servidor libre
-            container.innerHTML = `<iframe src="https://${JITSI_SERVER}/${roomName}#config.startWithAudioMuted=true&config.startWithVideoMuted=true" allow="camera; microphone; fullscreen; display-capture; teamviewer" style="width:100%; height:500px; border:none;"></iframe>`;
+
+            if (!studentEmail) {
+                alert("Socio, debes ingresar el correo electrónico del estudiante para comprobar su registro en Excel.");
+                return;
+            }
+
+            container.innerHTML = `<div style="text-align: center; color: var(--accent-gold); font-weight: bold; padding: 40px;">🔍 Verificando registro en la hoja de Excel...</div>`;
+
+            try {
+                // Petición POST al Apps Script enviando la acción de validar estudiante
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: "validarEstudiante",
+                        email: studentEmail
+                    })
+                });
+                
+                const resultado = await response.json();
+
+                // Evaluamos si el backend lo encuentra activo y registrado
+                if (resultado.success && resultado.autorizado) {
+                    alert(`¡Estudiante Validado Exitosamente! Bienvenido al Aula.`);
+                    container.innerHTML = `<iframe src="https://${JITSI_SERVER}/${roomName}#config.startWithAudioMuted=true&config.startWithVideoMuted=true" allow="camera; microphone; fullscreen; display-capture; teamviewer" style="width:100%; height:550px; border:none;"></iframe>`;
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align: center; color: #ff4d4d; padding: 40px; border: 2px dashed #ff4d4d; border-radius: 8px; background: rgba(26,0,0,0.5);">
+                            <h3>❌ Acceso No Autorizado</h3>
+                            <p>El correo <strong>${studentEmail}</strong> no figura en los registros de Google Forms o la base de datos de Excel.</p>
+                            <button class="btn-control" onclick="limpiarPantallaAula()" style="margin-top: 10px; border-color: #ff4d4d; color: #ff4d4d;">Volver a Intentar</button>
+                        </div>`;
+                }
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = `
+                    <div style="text-align: center; color: var(--accent-gold); padding: 40px;">
+                        <h3>⚠️ Error de Respuesta Servidor</h3>
+                        <p>No se pudo completar la validación en tiempo real. Revisa si la macro en tu script maneja la acción 'validarEstudiante'.</p>
+                        <button class="btn-control" onclick="limpiarPantallaAula()" style="margin-top: 10px;">Reintentar Conexión</button>
+                    </div>`;
+            }
+        }
+
+        function limpiarPantallaAula() {
+            document.getElementById('jitsi-container').innerHTML = `
+                <div style="text-align: center; color: var(--text-muted); padding: 50px;">
+                    El sistema cargará el aula interactiva WebRTC aquí una vez verificadas tus credenciales de Google Sheets.
+                </div>`;
         }
 
         /* --- MÓDULO 4: VITRINA DE PUBLICIDAD INTERACTIVA --- */
@@ -753,8 +816,8 @@
             row.style.display = "flex";
             row.style.gap = "10px";
             row.innerHTML = `
-                <input type="text" placeholder="Título Comercial (Ej: Ferretería Lugu)" class="form-control row-title" style="flex: 1;" value="${title}" required>
-                <input type="url" placeholder="https://ejemplo.com/catalogo" class="form-control row-url" style="flex: 2;" value="${url}" required>
+                <input type="text" placeholder="Título Comercial" class="form-control row-title" style="flex: 1;" value="${title}" required>
+                <input type="url" placeholder="https://ejemplo.com" class="form-control row-url" style="flex: 2;" value="${url}" required>
                 <button type="button" class="btn-control btn-danger" onclick="this.parentElement.remove()" style="padding: 10px;">✖</button>
             `;
             container.appendChild(row);
@@ -768,7 +831,6 @@
             const instagram = document.getElementById('adm-instagram').value;
             const facebook = document.getElementById('adm-facebook').value;
             
-            // Recopilar filas de enlaces de publicidad
             const adLinks = [];
             document.querySelectorAll('.ad-link-row').forEach(row => {
                 const title = row.querySelector('.row-title').value;
@@ -776,7 +838,7 @@
                 adLinks.push({ title: title, url: url });
             });
 
-            alert("Sincronizando y resguardando configuraciones corporativas en el backend...");
+            alert("Sincronizando y resguardando configuraciones corporativas...");
 
             try {
                 const response = await fetch(SCRIPT_URL, {
@@ -793,7 +855,7 @@
                 const resJson = await response.json();
                 if(resJson.success) {
                     alert("¡Configuración comercial guardada de forma exitosa!");
-                    location.reload(); // Recargar para forzar la actualización de cabeceras comerciales
+                    location.reload();
                 } else { alert("Error al guardar ajustes."); }
             } catch(e) { alert("Error crítico de comunicación."); }
         }
