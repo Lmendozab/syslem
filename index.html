@@ -196,7 +196,7 @@
             </nav>
         </div>
         <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; font-size: 0.8rem; color: var(--text-muted);">
-            HM-BC Platform v3.0
+            HM-BC Platform v3.1
         </div>
     </div>
 
@@ -319,7 +319,7 @@
 
                     <h3 style="color: var(--accent-gold); margin-top: 25px; font-size: 1.1rem;">👥 Estatus Base de Datos (Google Sheets / Form)</h3>
                     <div class="form-group" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                        <p style="margin: 0; color: #fff;">Alumnos Sincronizados Actualmente:: <span id="sync-students-count" style="color: var(--accent-cyan); font-weight: bold; font-size: 1.2rem;">0</span></p>
+                        <p style="margin: 0; color: #fff;">Alumnos Sincronizados Actualmente: <span id="sync-students-count" style="color: var(--accent-cyan); font-weight: bold; font-size: 1.2rem;">0</span></p>
                         <small style="color: var(--text-muted); display: block; margin-top: 5px;">*Los datos se extraen de forma automatizada de la hoja vinculada a tu formulario cada vez que se refresca la aplicación.</small>
                     </div>
 
@@ -460,7 +460,18 @@
                 return;
             }
 
-            const encontrado = listaEstudiantesPermitidos.some(student => student === inputVal);
+            // 1. Blindamos la lista: la aplanamos si viene en filas/columnas, pasamos todo a Texto y quitamos espacios
+            const listaLimpia = listaEstudiantesPermitidos.flat(Infinity).map(student => {
+                if (student === null || student === undefined) return "";
+                return String(student).trim().toLowerCase();
+            });
+
+            // 2. Buscamos coincidencia eliminando los "+" para evitar errores de marcado de país
+            const encontrado = listaLimpia.some(student => {
+                const estudianteSinMas = student.replace("+", "").trim();
+                const inputSinMas = inputVal.replace("+", "").trim();
+                return estudianteSinMas === inputSinMas && estudianteSinMas !== "";
+            });
 
             if(encontrado) {
                 document.getElementById('aula-gate').style.display = "none";
