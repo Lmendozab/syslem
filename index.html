@@ -70,13 +70,24 @@
         .barrita { width: 6px; height: 35px; background: var(--accent-gold); animation: sonando 0.5s infinite alternate ease-in-out; }
         @keyframes blink { 0% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        /* ========== NUEVOS ESTILOS PARA EL AULA VIRTUAL MEJORADA ========== */
+        /* ========== ESTILOS NUEVOS PARA PANEL LATERAL IZQUIERDO ========== */
         .aula-layout {
             display: flex;
             gap: 20px;
             height: 100%;
             min-height: 500px;
             transition: all 0.3s;
+        }
+        /* Panel izquierdo de controles */
+        .aula-panel-izquierdo {
+            width: 220px;
+            background: var(--bg-sidebar);
+            border-radius: 12px;
+            border: 1px solid var(--accent-cyan);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px;
         }
         .aula-contenido {
             flex: 3;
@@ -128,14 +139,27 @@
             position: relative;
             overflow: hidden;
             border: 1px solid #2a4c6e;
+            transition: all 0.3s;
         }
         .visor-aula iframe, .visor-aula img, .visor-aula embed, .visor-aula video {
             width: 100%;
             height: 100%;
             border: none;
             object-fit: contain;
+            transition: transform 0.3s;
         }
-        .jitsi-mini {
+        .visor-aula.pantalla-completa {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2000;
+            border-radius: 0;
+            margin: 0;
+        }
+        /* Ventana flotante del anfitrión */
+        .floating-video {
             position: fixed;
             bottom: 20px;
             right: 20px;
@@ -147,19 +171,92 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             border: 2px solid var(--accent-gold);
             background: #000;
-            resize: both;
             cursor: move;
+            resize: both;
         }
-        .jitsi-mini iframe {
+        .floating-video iframe {
             width: 100%;
             height: 100%;
             border: none;
         }
-        .controles-anfitrion {
+        .floating-controls {
+            position: absolute;
+            top: 5px;
+            right: 5px;
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            flex-wrap: wrap;
+            gap: 5px;
+            z-index: 1001;
+        }
+        .floating-controls button {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: 1px solid var(--accent-gold);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px 6px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-top: 1px solid rgba(0,210,255,0.3);
+            padding-top: 10px;
+        }
+        .control-label {
+            font-size: 0.8rem;
+            color: var(--accent-gold);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .interruptor-linea {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--accent-gold);
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .btn-pequeno {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            width: 100%;
         }
         .lista-estudiantes {
             padding: 15px;
@@ -238,52 +335,6 @@
         .pdf-item:hover {
             background: var(--accent-cyan);
             color: #000;
-        }
-        .interruptor {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-            justify-content: flex-end;
-        }
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.4s;
-            border-radius: 24px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: var(--accent-gold);
-        }
-        input:checked + .slider:before {
-            transform: translateX(26px);
         }
     </style>
 </head>
@@ -367,10 +418,10 @@
         </div>
     </div>
 
-    <!-- MÓDULO AULA VIRTUAL (MEJORADO CON CLASES/CURSOS ONLINE) -->
+    <!-- MÓDULO AULA VIRTUAL (MEJORADO CON PANEL DE CONTROLES LATERAL) -->
     <div id="mod-aula" class="app-module">
         <div class="card-panel" style="height: 90%; display: flex; flex-direction: column;">
-            <h2 class="module-title">Aula Virtual - Control de Acceso + Chat + Contenidos</h2>
+            <h2 class="module-title">Aula Virtual - Control de Acceso + Contenidos</h2>
             <div style="display: flex; gap: 15px; margin-bottom: 20px; background: var(--bg-sidebar); padding: 15px; border-radius: 8px; flex-wrap: wrap;">
                 <div class="form-group" style="flex:1; min-width:200px;">
                     <label>Sala / Taller</label>
@@ -387,7 +438,50 @@
 
             <div id="aula-autenticado" style="display: none; flex-grow: 1; flex-direction: column; gap: 15px;">
                 <div class="aula-layout" id="aulaLayout">
-                    <!-- Columna izquierda: contenido principal -->
+                    <!-- NUEVO PANEL LATERAL IZQUIERDO DE CONTROLES -->
+                    <div class="aula-panel-izquierdo">
+                        <div class="control-group">
+                            <div class="control-label">Controles de Chat</div>
+                            <div class="interruptor-linea">
+                                <span style="font-size:0.8rem;">Mostrar panel</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="togglePanelCheckbox" checked onchange="togglePanelDerecho()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">Pantalla completa</div>
+                            <div class="interruptor-linea">
+                                <span style="font-size:0.8rem;">Modo presentación</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="fullscreenToggle" onchange="toggleFullscreenVisor()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">Zoom del visor</div>
+                            <select id="visorZoomSelect" class="form-control" style="font-size:0.8rem; padding:5px;" onchange="cambiarZoomVisor(this.value)">
+                                <option value="0.8">80%</option>
+                                <option value="1.0" selected>100%</option>
+                                <option value="1.2">120%</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">Reproductor</div>
+                            <button class="btn-control btn-pequeno" id="btn-pause-play-clase" onclick="toggleReproduccionClase()">⏸ Pausar</button>
+                            <button class="btn-control btn-pequeno" onclick="anteriorMediaClase()">⏪ Anterior</button>
+                            <button class="btn-control btn-pequeno" onclick="siguienteMediaClase()">Siguiente ⏩</button>
+                            <button class="btn-control btn-pequeno" onclick="recargarMediaClase()">🔄 Recargar</button>
+                            <button class="btn-control btn-pequeno" onclick="subirArchivoClase()">📤 Subir archivo</button>
+                        </div>
+                        <div class="control-group">
+                            <button class="btn-control btn-danger btn-pequeno" onclick="salirDelAula()">🚪 Salir del Aula</button>
+                        </div>
+                    </div>
+
+                    <!-- Columna central: contenido principal -->
                     <div class="aula-contenido">
                         <div class="aula-opciones">
                             <button class="opcion-btn active" data-opcion="clases" onclick="seleccionarOpcionAula('clases')">🎥 Clases / Cursos Online</button>
@@ -397,22 +491,10 @@
                         <div class="visor-aula" id="visor-aula">
                             <div style="text-align:center; color:#8fa0b0;">Selecciona una opción para comenzar</div>
                         </div>
-                        <!-- Controles para anfitrión (solo si es el profesor) -->
-                        <div id="controles-anfitrion" class="controles-anfitrion" style="display: none;">
-                            <button class="btn-control" onclick="subirArchivoClase()">📤 Subir archivo a la clase</button>
-                            <button class="btn-control" onclick="recargarMediaClase()">🔄 Recargar contenido</button>
-                            <small style="color:var(--text-muted);">Eres el anfitrión: control total</small>
-                        </div>
                     </div>
-                    <!-- Columna derecha: estudiantes conectados + chat (con interruptor) -->
+
+                    <!-- Columna derecha: estudiantes + chat (con interruptor) -->
                     <div class="aula-panel-derecho" id="panelDerecho">
-                        <div class="interruptor">
-                            <span style="font-size:0.8rem;">Mostrar/Ocultar panel</span>
-                            <label class="switch">
-                                <input type="checkbox" id="togglePanel" checked onchange="togglePanelDerecho()">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
                         <div class="lista-estudiantes" id="lista-estudiantes-panel">
                             <h4>👥 Estudiantes Conectados</h4>
                             <div id="conectados-lista">Cargando...</div>
@@ -473,15 +555,15 @@
 </div>
 
 <script>
-    // ==================== CONFIGURACIÓN GLOBAL ====================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyiNm-r8Ue9SISKpvJfGqW5E9OV4b7sr_y8DvXp7gZm4BC32Zb9hrktAhIvfmMVFwQ/exec"; // Reemplazar con tu URL
+    // ==================== CONFIGURACIÓN GLOBAL (sin cambios) ====================
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyiNm-r8Ue9SISKpvJfGqW5E9OV4b7sr_y8DvXp7gZm4BC32Zb9hrktAhIvfmMVFwQ/exec";
     const JITSI_SERVER = "meet.ffmuc.net";
     const TIEMPO_IMAGEN = 5000;
     const TIEMPO_VIDEO_DEFECTO = 30000;
     const TIEMPO_AUDIO_RESPALDO = 15000;
 
     let archivos = [];
-    let classMedia = [];         // Archivos de la carpeta LOTERIA_DIARIA
+    let classMedia = [];
     let configComercial = {};
     let indexActual = 0;
     let reproductorTimer = null;
@@ -505,14 +587,16 @@
     let mediaTimerAula = null;
     let currentMediaIndex = 0;
     let mediaListAula = [];
-    let jitsiFrame = null;       // Para la ventana flotante de Jitsi
-    let jitsiContainer = null;
+    let flotante = null;
+    let reproductorPausado = false;
+    let zoomVisorActual = 1.0;
 
     // Reloj Venezuela
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('es-VE'); }, 1000);
     function formatTime(seconds) { if (isNaN(seconds) || seconds < 0) return "00:00"; let m = Math.floor(seconds/60).toString().padStart(2,'0'); let s = Math.floor(seconds%60).toString().padStart(2,'0'); return `${m}:${s}`; }
 
     // ==================== FUNCIONES ORIGINALES (CARTELERA, GRABADOR, ETC) ====================
+    // (Todas las funciones originales se mantienen EXACTAMENTE igual)
     function switchModule(moduleName, element) {
         document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
         element.classList.add('active');
@@ -550,7 +634,6 @@
             linksContainer.innerHTML = "";
             if(configComercial.adLinks && configComercial.adLinks.length) configComercial.adLinks.forEach(item => addAdLinkRow(item.title, item.url));
             document.getElementById('msg-espera').innerText = "Medios listos. Presione botón amarillo.";
-            // Extraer PDFs de classMedia para la opción de PDFs en el aula
             pdfFiles = classMedia.filter(f => f.mimeType.includes('pdf'));
         } catch(e) { setTimeout(precargarLista, 3000); }
     }
@@ -566,23 +649,20 @@
     function regresarMedia(){ esPausado=false; apagarControles(); indexActual--; if(indexActual<0) indexActual=archivos.length-1; mostrarMedia(indexActual); }
     async function refrescarListaEnSegundoPlano(){ try{ const res=await fetch(SCRIPT_URL); const d=await res.json(); if(d.archivos && d.archivos.length) archivos=d.archivos; } catch(e){} }
 
-    // Grabador
     async function initWebcam(){ try{ const stream=await navigator.mediaDevices.getUserMedia({audio:true, video:true}); document.getElementById('webcam-preview').srcObject=stream; } catch(err){ alert("Permisos de cámara y micrófono necesarios."); } }
     function startRecording(type){ typeRecording=type; recordedChunks=[]; const stream=document.getElementById('webcam-preview').srcObject; if(!stream) return; let options={ mimeType: type==='audio'?'audio/webm':'video/webm;codecs=vp8' }; mediaRecorder=new MediaRecorder(stream,options); mediaRecorder.ondataavailable=(e)=>{ if(e.data.size>0) recordedChunks.push(e.data); }; mediaRecorder.onstop=processStopRecording; mediaRecorder.start(); document.getElementById('rec-status').style.display='block'; document.getElementById('btn-stop-rec').disabled=false; document.getElementById('btn-start-audio').disabled=true; document.getElementById('btn-start-video').disabled=true; }
     function stopRecording(){ if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop(); document.getElementById('rec-status').style.display='none'; document.getElementById('btn-stop-rec').disabled=true; document.getElementById('btn-start-audio').disabled=false; document.getElementById('btn-start-video').disabled=false; }
     function processStopRecording(){ blobGrabado=new Blob(recordedChunks,{type:typeRecording==='audio'?'audio/mp3':'video/mp4'}); const url=URL.createObjectURL(blobGrabado); document.getElementById('recording-preview-box').style.display='block'; const audioPlayback=document.getElementById('audio-playback'); const videoPlayback=document.getElementById('video-playback'); if(typeRecording==='audio'){ videoPlayback.style.display='none'; audioPlayback.style.display='block'; audioPlayback.src=url; } else { audioPlayback.style.display='none'; videoPlayback.style.display='block'; videoPlayback.src=url; } }
     function uploadCapturedFile(){ if(!blobGrabado) return; const reader=new FileReader(); reader.readAsDataURL(blobGrabado); reader.onloadend=async function(){ const base64Data=reader.result; const extension=typeRecording==='audio'?'mp3':'mp4'; const nameFile=`Grabacion_${Date.now()}.${extension}`; alert("Subiendo..."); try{ const response=await fetch(SCRIPT_URL,{ method:'POST', body:JSON.stringify({ action:"uploadFile", fileName:nameFile, fileData:base64Data }) }); const resJson=await response.json(); if(resJson.success){ alert(`Archivo guardado en Drive.`); document.getElementById('recording-preview-box').style.display='none'; refrescarListaEnSegundoPlano(); } else alert("Error."); } catch(err){ alert("Error de red."); } }; }
 
-    // Publicidad
     function renderPublicidadGrid(){ const container=document.getElementById('publicidad-grid-container'); container.innerHTML=""; if(!configComercial.adLinks || configComercial.adLinks.length===0){ container.innerHTML="<p>No hay enlaces.</p>"; return; } configComercial.adLinks.forEach(ad=>{ const card=document.createElement('div'); card.className="ad-card"; card.innerHTML=`<div><h4>${ad.title}</h4><p>${ad.url}</p></div><button class="btn-control" onclick="openAdViewer('${ad.url}')">Ver</button>`; container.appendChild(card); }); }
     function openAdViewer(url){ document.getElementById('ad-viewer-wrapper').style.display="block"; document.getElementById('ad-iframe-browser').src=url; }
     function closeAdViewer(){ document.getElementById('ad-viewer-wrapper').style.display="none"; document.getElementById('ad-iframe-browser').src=""; }
 
-    // Admin
     function addAdLinkRow(title="",url=""){ const container=document.getElementById('admin-links-rows'); const row=document.createElement('div'); row.style.display="flex"; row.style.gap="10px"; row.innerHTML=`<input type="text" placeholder="Título" class="form-control row-title" value="${title}"><input type="url" placeholder="URL" class="form-control row-url" value="${url}"><button type="button" class="btn-control btn-danger" onclick="this.parentElement.remove()">✖</button>`; container.appendChild(row); }
     async function saveAdminConfig(event){ event.preventDefault(); const nombre=document.getElementById('adm-nombre').value; const telefono=document.getElementById('adm-telefono').value; const instagram=document.getElementById('adm-instagram').value; const facebook=document.getElementById('adm-facebook').value; const adLinks=[]; document.querySelectorAll('.ad-link-row').forEach(row=>{ adLinks.push({ title:row.querySelector('.row-title').value, url:row.querySelector('.row-url').value }); }); alert("Guardando configuración..."); try{ const response=await fetch(SCRIPT_URL,{ method:'POST', body:JSON.stringify({ action:"saveConfig", nombre, telefono, instagram, facebook, adLinks }) }); const resJson=await response.json(); if(resJson.success){ alert("Configuración guardada."); location.reload(); } else alert("Error."); } catch(e){ alert("Error de red."); } }
 
-    // ==================== NUEVAS FUNCIONES PARA EL AULA VIRTUAL ====================
+    // ==================== FUNCIONES DEL AULA VIRTUAL (MEJORADAS) ====================
     async function conectarAulaVirtual() {
         const correo = document.getElementById('student-id-input').value.trim();
         if(!correo) { alert("Ingresa tu correo registrado."); return; }
@@ -600,23 +680,40 @@
                 estudianteActual = { nombre: data.nombre, correo: data.correo };
                 containerAuth.style.display = "flex";
                 containerNoAuth.style.display = "none";
-                // Registrar al estudiante como activo
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: "joinClass", correo: estudianteActual.correo, nombre: estudianteActual.nombre })
                 });
-                // Si el correo es del anfitrión (definido en configuración o hardcodeado), mostrar controles
-                // Por defecto, asumimos que el primer correo en la lista de estudiantes o el que coincide con "admin@..." es anfitrión
-                const esAnfitrion = (estudianteActual.correo === "tu_correo_anfitrion@ejemplo.com"); // Cambia o saca de config
-                if(esAnfitrion) document.getElementById('controles-anfitrion').style.display = "flex";
+                // Verificar si es anfitrión (cambiar por tu correo)
+                const esAnfitrion = (estudianteActual.correo === "tutor@example.com"); // CAMBIA ESTO
+                if(esAnfitrion) {
+                    // Mostrar todos los controles (ya están visibles por defecto)
+                }
                 cargarEstudiantesActivos();
                 cargarMensajesChat();
                 iniciarPolling();
                 seleccionarOpcionAula('clases');
             } else {
-                alert("Correo no autorizado. No estás registrado en la hoja de Excel.");
+                alert("Correo no autorizado.");
             }
-        } catch(e) { alert("Error de conexión con el servidor."); }
+        } catch(e) { alert("Error de conexión."); }
+    }
+
+    function salirDelAula() {
+        // Ocultar la sección autenticada, mostrar el formulario de validación
+        document.getElementById('aula-autenticado').style.display = "none";
+        document.getElementById('aula-no-autenticado').style.display = "block";
+        // Detener polling
+        if(pollingInterval) clearInterval(pollingInterval);
+        // Cerrar ventana flotante si existe
+        if(flotante) flotante.remove();
+        flotante = null;
+        // Limpiar visor
+        document.getElementById('visor-aula').innerHTML = '<div style="text-align:center; color:#8fa0b0;">Selecciona una opción para comenzar</div>';
+        // Resetear opción actual
+        currentOpcionAula = "clases";
+        reproductorPausado = false;
+        if(mediaTimerAula) clearTimeout(mediaTimerAula);
     }
 
     async function cargarEstudiantesActivos() {
@@ -625,17 +722,14 @@
             const data = await res.json();
             if(data.success) {
                 const container = document.getElementById('conectados-lista');
-                if(data.students.length === 0) {
-                    container.innerHTML = "<div>No hay estudiantes conectados</div>";
-                } else {
+                if(data.students.length === 0) container.innerHTML = "<div>No hay estudiantes conectados</div>";
+                else {
                     let html = "";
-                    data.students.forEach(s => {
-                        html += `<div class="estudiante-item">👤 <strong>${s.nombre}</strong> (${s.correo})</div>`;
-                    });
+                    data.students.forEach(s => { html += `<div class="estudiante-item">👤 <strong>${s.nombre}</strong> (${s.correo})</div>`; });
                     container.innerHTML = html;
                 }
             }
-        } catch(e) { console.error(e); }
+        } catch(e) {}
     }
 
     let pollingInterval = null;
@@ -653,9 +747,8 @@
             const data = await res.json();
             if(data.success) {
                 const container = document.getElementById('chat-mensajes');
-                if(data.messages.length === 0) {
-                    container.innerHTML = "<div style='color:gray;'>No hay mensajes aún. ¡Inicia la conversación!</div>";
-                } else {
+                if(data.messages.length === 0) container.innerHTML = "<div style='color:gray;'>No hay mensajes aún.</div>";
+                else {
                     let html = "";
                     data.messages.slice(-30).forEach(m => {
                         html += `<div class="mensaje"><span class="mensaje-usuario">${m.usuario}:</span> <span class="mensaje-texto">${m.mensaje}</span><br><small style="color:#6c8a9e;">${new Date(m.timestamp).toLocaleTimeString()}</small></div>`;
@@ -664,7 +757,7 @@
                     container.scrollTop = container.scrollHeight;
                 }
             }
-        } catch(e) { console.error(e); }
+        } catch(e) {}
     }
 
     async function enviarMensajeChat() {
@@ -674,21 +767,35 @@
         try {
             await fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify({
-                    action: "sendMessage",
-                    nombre: estudianteActual.nombre,
-                    correo: estudianteActual.correo,
-                    mensaje: mensaje
-                })
+                body: JSON.stringify({ action: "sendMessage", nombre: estudianteActual.nombre, correo: estudianteActual.correo, mensaje: mensaje })
             });
             input.value = "";
             cargarMensajesChat();
-        } catch(e) { alert("Error al enviar mensaje."); }
+        } catch(e) {}
     }
 
     function togglePanelDerecho() {
         const panel = document.getElementById('panelDerecho');
         panel.classList.toggle('oculto');
+        // Sincronizar el checkbox
+        const chk = document.getElementById('togglePanelCheckbox');
+        if(chk) chk.checked = !panel.classList.contains('oculto');
+    }
+
+    function toggleFullscreenVisor() {
+        const visor = document.getElementById('visor-aula');
+        const chk = document.getElementById('fullscreenToggle');
+        if(chk.checked) {
+            visor.classList.add('pantalla-completa');
+        } else {
+            visor.classList.remove('pantalla-completa');
+        }
+    }
+
+    function cambiarZoomVisor(valor) {
+        zoomVisorActual = parseFloat(valor);
+        const contenido = document.querySelector('#visor-aula > *');
+        if(contenido) contenido.style.transform = `scale(${zoomVisorActual})`;
     }
 
     // ---------- Opciones del Aula ----------
@@ -698,6 +805,12 @@
         document.querySelector(`.opcion-btn[data-opcion="${opcion}"]`).classList.add('active');
         const visor = document.getElementById('visor-aula');
         visor.innerHTML = '<div style="text-align:center; color:#8fa0b0;">Cargando...</div>';
+        // Ocultar ventana flotante si no es el modo clases
+        if(opcion !== 'clases' && flotante) {
+            flotante.style.display = 'none';
+        } else if(opcion === 'clases' && flotante) {
+            flotante.style.display = 'block';
+        }
         if(opcion === 'clases') {
             iniciarClasesOnline();
         } else if(opcion === 'videos') {
@@ -708,21 +821,39 @@
     }
 
     function iniciarClasesOnline() {
-        const visor = document.getElementById('visor-aula');
-        visor.innerHTML = '<div style="text-align:center; color:#8fa0b0;">Iniciando videoconferencia y contenido de clase...</div>';
-        
-        // Crear ventana flotante para Jitsi (anfitrión con cámara)
-        if(jitsiContainer) jitsiContainer.remove();
-        jitsiContainer = document.createElement('div');
-        jitsiContainer.className = 'jitsi-mini';
-        jitsiContainer.id = 'jitsi-mini';
-        const roomName = document.getElementById('room-id-input').value.replace(/\s+/g, '_');
-        jitsiContainer.innerHTML = `<iframe src="https://${JITSI_SERVER}/${roomName}#config.startWithAudioMuted=false&config.startWithVideoMuted=false" allow="camera; microphone; fullscreen; display-capture" style="width:100%; height:100%; border:none;"></iframe>`;
-        document.body.appendChild(jitsiContainer);
-        
-        // Hacer arrastrable la ventana
+        // Crear ventana flotante con Jitsi (si no existe)
+        if(!flotante) {
+            flotante = document.createElement('div');
+            flotante.className = 'floating-video';
+            flotante.id = 'floating-video';
+            const roomName = document.getElementById('room-id-input').value.replace(/\s+/g, '_');
+            flotante.innerHTML = `
+                <div class="floating-controls">
+                    <button onclick="maximizarFlotante()">🗖</button>
+                    <button onclick="restaurarFlotante()">✖</button>
+                </div>
+                <iframe src="https://${JITSI_SERVER}/${roomName}#config.startWithAudioMuted=false&config.startWithVideoMuted=false" allow="camera; microphone; fullscreen; display-capture"></iframe>
+            `;
+            document.body.appendChild(flotante);
+            hacerArrastrable(flotante);
+        } else {
+            flotante.style.display = 'block';
+        }
+        // Iniciar reproductor de medios
+        if(classMedia.length === 0) {
+            document.getElementById('visor-aula').innerHTML = '<div style="text-align:center; color:red;">No hay contenido en la carpeta de clase.</div>';
+            return;
+        }
+        mediaListAula = classMedia;
+        currentMediaIndex = 0;
+        reproductorPausado = false;
+        document.getElementById('btn-pause-play-clase').innerHTML = "⏸ Pausar";
+        mostrarMediaClase();
+    }
+
+    function hacerArrastrable(el) {
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        jitsiContainer.onmousedown = dragMouseDown;
+        el.onmousedown = dragMouseDown;
         function dragMouseDown(e) {
             e = e || window.event;
             e.preventDefault();
@@ -738,43 +869,65 @@
             pos2 = pos4 - e.clientY;
             pos3 = e.clientX;
             pos4 = e.clientY;
-            jitsiContainer.style.top = (jitsiContainer.offsetTop - pos2) + "px";
-            jitsiContainer.style.left = (jitsiContainer.offsetLeft - pos1) + "px";
-            jitsiContainer.style.bottom = "auto";
-            jitsiContainer.style.right = "auto";
+            el.style.top = (el.offsetTop - pos2) + "px";
+            el.style.left = (el.offsetLeft - pos1) + "px";
+            el.style.bottom = "auto";
+            el.style.right = "auto";
         }
         function closeDragElement() {
             document.onmouseup = null;
             document.onmousemove = null;
         }
+    }
 
-        // Reproducir contenido de la carpeta LOTERIA_DIARIA en el visor principal
-        if(classMedia.length === 0) {
-            visor.innerHTML = '<div style="text-align:center; color:red;">No hay contenido en la carpeta LOTERIA_DIARIA.</div>';
-            return;
+    function maximizarFlotante() {
+        if(flotante) {
+            flotante.style.width = "100%";
+            flotante.style.height = "100%";
+            flotante.style.top = "0";
+            flotante.style.left = "0";
+            flotante.style.bottom = "0";
+            flotante.style.right = "0";
+            flotante.style.borderRadius = "0";
+            flotante.style.zIndex = "2000";
         }
-        mediaListAula = classMedia;
-        currentMediaIndex = 0;
-        mostrarMediaClase();
+    }
+
+    function restaurarFlotante() {
+        if(flotante) {
+            flotante.style.width = "320px";
+            flotante.style.height = "240px";
+            flotante.style.bottom = "20px";
+            flotante.style.right = "20px";
+            flotante.style.top = "auto";
+            flotante.style.left = "auto";
+            flotante.style.borderRadius = "12px";
+            flotante.style.zIndex = "1000";
+        }
     }
 
     function mostrarMediaClase() {
+        if(reproductorPausado) return;
         if(!mediaListAula.length) return;
         const file = mediaListAula[currentMediaIndex];
         const visor = document.getElementById('visor-aula');
-        visor.innerHTML = ''; // Limpiar
+        visor.innerHTML = '';
+        // Aplicar zoom actual al nuevo contenido
         if(file.mimeType.includes('video')) {
             const iframe = document.createElement('iframe');
             iframe.src = `https://drive.google.com/file/d/${file.id}/preview?autoplay=1`;
             iframe.allow = "autoplay; fullscreen";
             iframe.style.width = "100%";
             iframe.style.height = "100%";
+            iframe.style.transform = `scale(${zoomVisorActual})`;
             visor.appendChild(iframe);
             if(mediaTimerAula) clearTimeout(mediaTimerAula);
             const duracion = file.duracion || TIEMPO_VIDEO_DEFECTO;
             mediaTimerAula = setTimeout(() => {
-                currentMediaIndex = (currentMediaIndex + 1) % mediaListAula.length;
-                mostrarMediaClase();
+                if(!reproductorPausado) {
+                    currentMediaIndex = (currentMediaIndex + 1) % mediaListAula.length;
+                    mostrarMediaClase();
+                }
             }, duracion);
         } else if(file.mimeType.includes('image')) {
             const img = document.createElement('img');
@@ -782,14 +935,16 @@
             img.style.width = "100%";
             img.style.height = "100%";
             img.style.objectFit = "contain";
+            img.style.transform = `scale(${zoomVisorActual})`;
             visor.appendChild(img);
             if(mediaTimerAula) clearTimeout(mediaTimerAula);
             mediaTimerAula = setTimeout(() => {
-                currentMediaIndex = (currentMediaIndex + 1) % mediaListAula.length;
-                mostrarMediaClase();
+                if(!reproductorPausado) {
+                    currentMediaIndex = (currentMediaIndex + 1) % mediaListAula.length;
+                    mostrarMediaClase();
+                }
             }, TIEMPO_IMAGEN);
         } else if(file.mimeType.includes('audio')) {
-            // Mostrar imagen de fondo y controles de audio
             let imagenPrevia = "";
             for(let i=currentMediaIndex-1; i>=0; i--) {
                 if(mediaListAula[i].mimeType.includes('image')) {
@@ -816,41 +971,116 @@
             audioPlayer.style.zIndex = "10";
             visor.appendChild(audioPlayer);
             audioPlayer.onended = () => {
-                currentMediaIndex = (currentMediaIndex + 1) % mediaListAula.length;
-                mostrarMediaClase();
+                if(!reproductorPausado) {
+                    currentMediaIndex = (currentMediaIndex + 1) % mediaListAula.length;
+                    mostrarMediaClase();
+                }
             };
             if(mediaTimerAula) clearTimeout(mediaTimerAula);
             mediaTimerAula = setTimeout(() => {
-                if(!audioPlayer.paused) audioPlayer.pause();
-                currentMediaIndex = (currentMediaIndex + 1) % mediaListAula.length;
-                mostrarMediaClase();
+                if(!reproductorPausado) {
+                    if(!audioPlayer.paused) audioPlayer.pause();
+                    currentMediaIndex = (currentMediaIndex + 1) % mediaListAula.length;
+                    mostrarMediaClase();
+                }
             }, file.duracion || 30000);
         } else if(file.mimeType.includes('pdf')) {
-            // Para PDF, mostrar embed
             const embed = document.createElement('embed');
             embed.src = `https://drive.google.com/viewerng/viewer?embedded=true&url=https://drive.google.com/uc?id=${file.id}`;
             embed.type = "application/pdf";
             embed.style.width = "100%";
             embed.style.height = "100%";
+            embed.style.transform = `scale(${zoomVisorActual})`;
             visor.appendChild(embed);
             if(mediaTimerAula) clearTimeout(mediaTimerAula);
             mediaTimerAula = setTimeout(() => {
-                currentMediaIndex = (currentMediaIndex + 1) % mediaListAula.length;
-                mostrarMediaClase();
+                if(!reproductorPausado) {
+                    currentMediaIndex = (currentMediaIndex + 1) % mediaListAula.length;
+                    mostrarMediaClase();
+                }
             }, 15000);
         }
+        // Aplicar zoom a cualquier elemento dentro del visor
+        const contenido = visor.querySelector('iframe, img, embed');
+        if(contenido) contenido.style.transform = `scale(${zoomVisorActual})`;
+    }
+
+    function toggleReproduccionClase() {
+        const btn = document.getElementById('btn-pause-play-clase');
+        if(reproductorPausado) {
+            reproductorPausado = false;
+            btn.innerHTML = "⏸ Pausar";
+            mostrarMediaClase(); // reanuda
+        } else {
+            reproductorPausado = true;
+            btn.innerHTML = "▶ Reanudar";
+            if(mediaTimerAula) clearTimeout(mediaTimerAula);
+            // Detener audio si está sonando
+            const audio = document.querySelector('#visor-aula audio');
+            if(audio) audio.pause();
+        }
+    }
+
+    function siguienteMediaClase() {
+        if(reproductorPausado) reproductorPausado = false;
+        if(mediaTimerAula) clearTimeout(mediaTimerAula);
+        currentMediaIndex = (currentMediaIndex + 1) % mediaListAula.length;
+        mostrarMediaClase();
+        document.getElementById('btn-pause-play-clase').innerHTML = "⏸ Pausar";
+    }
+
+    function anteriorMediaClase() {
+        if(reproductorPausado) reproductorPausado = false;
+        if(mediaTimerAula) clearTimeout(mediaTimerAula);
+        currentMediaIndex = (currentMediaIndex - 1 + mediaListAula.length) % mediaListAula.length;
+        mostrarMediaClase();
+        document.getElementById('btn-pause-play-clase').innerHTML = "⏸ Pausar";
     }
 
     function recargarMediaClase() {
-        if(currentOpcionAula === 'clases') {
-            if(mediaTimerAula) clearTimeout(mediaTimerAula);
-            currentMediaIndex = 0;
-            mostrarMediaClase();
-        } else if(currentOpcionAula === 'videos') {
-            iniciarReproductorAula();
-        }
+        if(mediaTimerAula) clearTimeout(mediaTimerAula);
+        currentMediaIndex = 0;
+        reproductorPausado = false;
+        mostrarMediaClase();
+        document.getElementById('btn-pause-play-clase').innerHTML = "⏸ Pausar";
     }
 
+    async function subirArchivoClase() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onloadend = async () => {
+                const base64 = reader.result;
+                alert("Subiendo archivo a la carpeta de clase...");
+                try {
+                    const resp = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: "uploadClassFile", fileName: file.name, fileData: base64 })
+                    });
+                    const json = await resp.json();
+                    if(json.success) {
+                        alert("Archivo subido. Recargando contenido...");
+                        const res = await fetch(SCRIPT_URL);
+                        const data = await res.json();
+                        classMedia = data.classMedia || [];
+                        pdfFiles = classMedia.filter(f => f.mimeType.includes('pdf'));
+                        if(currentOpcionAula === 'clases') {
+                            mediaListAula = classMedia;
+                            recargarMediaClase();
+                        } else if(currentOpcionAula === 'videos') iniciarReproductorAula();
+                        else if(currentOpcionAula === 'pdfs') mostrarListaPDFs();
+                    } else alert("Error al subir.");
+                } catch(err) { alert("Error de red."); }
+            };
+        };
+        input.click();
+    }
+
+    // Funciones para las otras dos opciones (sin cambios relevantes)
     function iniciarReproductorAula() {
         const multimedia = classMedia.filter(f => f.mimeType.includes('video') || f.mimeType.includes('image'));
         if(multimedia.length === 0) {
@@ -902,54 +1132,14 @@
             return;
         }
         let html = `<div class="pdf-list">`;
-        pdfFiles.forEach(pdf => {
-            html += `<div class="pdf-item" onclick="verPDF('${pdf.id}')">📄 ${pdf.name}</div>`;
-        });
+        pdfFiles.forEach(pdf => { html += `<div class="pdf-item" onclick="verPDF('${pdf.id}')">📄 ${pdf.name}</div>`; });
         html += `</div><div id="pdf-viewer" style="width:100%; height:400px; margin-top:15px;"></div>`;
         visor.innerHTML = html;
     }
 
     function verPDF(id) {
         const viewer = document.getElementById('pdf-viewer');
-        if(viewer) {
-            viewer.innerHTML = `<embed src="https://drive.google.com/viewerng/viewer?embedded=true&url=https://drive.google.com/uc?id=${id}" width="100%" height="400" type="application/pdf">`;
-        }
-    }
-
-    async function subirArchivoClase() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*,video/*,audio/*,application/pdf';
-        input.onchange = async (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onloadend = async () => {
-                const base64 = reader.result;
-                const nombre = file.name;
-                alert("Subiendo archivo a la carpeta de clase...");
-                try {
-                    const resp = await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: "uploadClassFile", fileName: nombre, fileData: base64 })
-                    });
-                    const json = await resp.json();
-                    if(json.success) {
-                        alert("Archivo subido exitosamente. Recargando contenido...");
-                        // Recargar lista de archivos de clase
-                        const res = await fetch(SCRIPT_URL);
-                        const data = await res.json();
-                        classMedia = data.classMedia || [];
-                        pdfFiles = classMedia.filter(f => f.mimeType.includes('pdf'));
-                        if(currentOpcionAula === 'clases') recargarMediaClase();
-                        else if(currentOpcionAula === 'videos') iniciarReproductorAula();
-                        else if(currentOpcionAula === 'pdfs') mostrarListaPDFs();
-                    } else alert("Error al subir.");
-                } catch(err) { alert("Error de red."); }
-            };
-        };
-        input.click();
+        if(viewer) viewer.innerHTML = `<embed src="https://drive.google.com/viewerng/viewer?embedded=true&url=https://drive.google.com/uc?id=${id}" width="100%" height="400" type="application/pdf">`;
     }
 
     window.onload = () => { precargarLista(); };
