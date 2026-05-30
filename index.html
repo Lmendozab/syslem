@@ -69,7 +69,6 @@ h2.module-title { margin-top: 0; color: var(--accent-cyan); border-bottom: 1px s
 @keyframes sonando { 0% { transform: scaleY(0.3); } 100% { transform: scaleY(1.3); } }
 .barrita { width: 6px; height: 35px; background: var(--accent-gold); animation: sonando 0.5s infinite alternate ease-in-out; }
 @keyframes blink { 0% { opacity: 0.3; } 100% { opacity: 1; } }
-/* ========== NUEVOS ESTILOS PARA EL PANEL IZQUIERDO DEL AULA ========== */
 .aula-layout {
 display: flex;
 gap: 20px;
@@ -156,7 +155,6 @@ z-index: 2000;
 border-radius: 0;
 margin: 0;
 }
-/* Ventana flotante del anfitrión (original) */
 .floating-video {
 position: fixed;
 bottom: 20px;
@@ -334,6 +332,63 @@ font-size: 0.8rem;
 background: var(--accent-cyan);
 color: #000;
 }
+/* ========== ESTILOS PARA ANFITRIONES EN ADMIN ========== */
+.anfitriones-section {
+margin-top: 25px;
+padding-top: 20px;
+border-top: 2px solid var(--accent-gold);
+}
+.anfitriones-lista {
+display: flex;
+flex-direction: column;
+gap: 8px;
+margin-top: 15px;
+max-height: 250px;
+overflow-y: auto;
+}
+.anfitrion-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+background: var(--bg-sidebar);
+border: 1px solid var(--accent-cyan);
+border-radius: 8px;
+padding: 10px 15px;
+}
+.anfitrion-info {
+display: flex;
+flex-direction: column;
+gap: 2px;
+}
+.anfitrion-nombre {
+color: var(--accent-gold);
+font-weight: bold;
+font-size: 0.95rem;
+}
+.anfitrion-correo {
+color: var(--text-muted);
+font-size: 0.8rem;
+}
+.badge-anfitrion {
+background: var(--accent-gold);
+color: #000;
+padding: 2px 8px;
+border-radius: 12px;
+font-size: 0.7rem;
+font-weight: bold;
+margin-left: 8px;
+}
+.indicador-anfitrion-aula {
+background: linear-gradient(90deg, #D4AF37, #f4d03f);
+color: #000;
+padding: 8px 16px;
+border-radius: 8px;
+font-weight: bold;
+text-align: center;
+margin-bottom: 10px;
+display: none;
+box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
 </style>
 </head>
 <body>
@@ -352,7 +407,7 @@ color: #000;
 </nav>
 </div>
 <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; font-size: 0.8rem; color: var(--text-muted);">
-HM-BC Platform v3.0
+HM-BC Platform v3.1
 </div>
 </div>
 <div id="main-content">
@@ -410,7 +465,7 @@ HM-BC Platform v3.0
 </div>
 </div>
 </div>
-<!-- MÓDULO AULA VIRTUAL (MODIFICADO: AGREGADO PANEL IZQUIERDO Y FUNCIONES) -->
+<!-- MÓDULO AULA VIRTUAL -->
 <div id="mod-aula" class="app-module">
 <div class="card-panel" style="height: 90%; display: flex; flex-direction: column;">
 <h2 class="module-title">Aula Virtual - Control de Acceso + Contenidos</h2>
@@ -428,8 +483,12 @@ HM-BC Platform v3.0
 </div>
 </div>
 <div id="aula-autenticado" style="display: none; flex-grow: 1; flex-direction: column; gap: 15px;">
+<!-- NUEVO: Indicador de anfitrión -->
+<div class="indicador-anfitrion-aula" id="indicador-anfitrion">
+⭐ BIENVENIDO ANFITRIÓN — Tienes control total del aula
+</div>
 <div class="aula-layout" id="aulaLayout">
-<!-- NUEVO PANEL LATERAL IZQUIERDO DE CONTROLES -->
+<!-- PANEL LATERAL IZQUIERDO DE CONTROLES -->
 <div class="aula-panel-izquierdo">
 <div class="control-group">
 <div class="control-label">Controles de Chat</div>
@@ -497,7 +556,7 @@ HM-BC Platform v3.0
 <div style="text-align:center; color:#8fa0b0;">Selecciona una opción para comenzar</div>
 </div>
 </div>
-<!-- Columna derecha: estudiantes + chat (original) -->
+<!-- Columna derecha: estudiantes + chat -->
 <div class="aula-panel-derecho" id="panelDerecho">
 <div class="lista-estudiantes" id="lista-estudiantes-panel">
 <h4>👥 Estudiantes Conectados</h4>
@@ -534,7 +593,7 @@ Por favor valida tu correo para acceder al aula.
 <iframe id="ad-iframe-browser" style="width:100%; height:500px; border:2px solid var(--accent-gold); border-radius:8px;"></iframe>
 </div>
 </div>
-<!-- MÓDULO ADMIN (original) -->
+<!-- MÓDULO ADMIN (MODIFICADO: SECCIÓN ANFITRIONES AGREGADA) -->
 <div id="mod-admin" class="app-module">
 <div class="card-panel">
 <h2 class="module-title">Configuración Administrativa</h2>
@@ -552,20 +611,41 @@ Por favor valida tu correo para acceder al aula.
 <button type="submit" class="btn-control" style="border-color:#00ff66; color:#00ff66;">💾 Guardar Configuración</button>
 </div>
 </form>
+<!-- ========== NUEVA SECCIÓN: GESTIÓN DE ANFITRIONES ========== -->
+<div class="anfitriones-section">
+<h2 class="module-title" style="color: var(--accent-gold);">⭐ Gestión de Anfitriones del Aula Virtual</h2>
+<p style="color: var(--text-muted); font-size: 0.9rem;">Los anfitriones tienen acceso especial al aula. Se guardan en Google Sheets.</p>
+<div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+<div class="form-group" style="flex:1; min-width:150px;">
+<label>Nombre del Anfitrión</label>
+<input type="text" id="new-host-name" class="form-control" placeholder="Ej: Luis Mendoza">
+</div>
+<div class="form-group" style="flex:1.5; min-width:200px;">
+<label>Correo Electrónico</label>
+<input type="email" id="new-host-email" class="form-control" placeholder="anfitrion@correo.com">
+</div>
+<div style="display: flex; align-items: flex-end;">
+<button type="button" class="btn-control" style="border-color:#00ff66; color:#00ff66;" onclick="agregarAnfitrion()">➕ Agregar Anfitrión</button>
+</div>
+</div>
+<div class="anfitriones-lista" id="anfitriones-lista-admin">
+<div style="color: var(--text-muted); text-align: center; padding: 20px;">Cargando anfitriones...</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 <script>
 // ==================== CONFIGURACIÓN GLOBAL ====================
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyiNm-r8Ue9SISKpvJfGqW5E9OV4b7sr_y8DvXp7gZm4BC32Zb9hrktAhIvfmMVFwQ/exec"; // ⚠️ REEMPLAZAR CON TU URL
-// Cambiamos a meet.jit.si porque meet.ffmuc.net bloquea la incrustación en iframes externos (X-Frame-Options / CSP)
-const JITSI_SERVER = "meet.jit.si"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyiNm-r8Ue9SISKpvJfGqW5E9OV4b7sr_y8DvXp7gZm4BC32Zb9hrktAhIvfmMVFwQ/exec";
+const JITSI_SERVER = "meet.jit.si";
 const TIEMPO_IMAGEN = 5000;
-const TIEMPO_VIDEO_DEFECTO = 30000;
+const TIEMPO_VIDEO_DEFECTO = 60000; // Fallback más generoso (60s) mientras carga la duración real
 const TIEMPO_AUDIO_RESPALDO = 15000;
 let archivos = [];
 let classMedia = [];
 let configComercial = {};
+let anfitriones = [];
 let indexActual = 0;
 let reproductorTimer = null;
 let clockTimer = null;
@@ -579,8 +659,7 @@ let recordedChunks = [];
 let typeRecording = "";
 let blobGrabado = null;
 const audioHardware = document.getElementById('global-audio');
-// Variables Aula Virtual (nuevas)
-let estudianteActual = { nombre: "", correo: "" };
+let estudianteActual = { nombre: "", correo: "", esAnfitrion: false };
 let currentOpcionAula = "clases";
 let pdfFiles = [];
 let mediaTimerAula = null;
@@ -592,10 +671,10 @@ let zoomVisorActual = 1.0;
 let ventanasIntercambiadas = false;
 let jitsiIframe = null;
 let pollingInterval = null;
-// Reloj Venezuela
 setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('es-VE'); }, 1000);
 function formatTime(seconds) { if (isNaN(seconds) || seconds < 0) return "00:00"; let m = Math.floor(seconds/60).toString().padStart(2,'0'); let s = Math.floor(seconds%60).toString().padStart(2,'0'); return `${m}:${s}`; }
-// ==================== FUNCIONES CARTELERA (originales) ====================
+
+// ==================== FUNCIONES CARTELERA (sin cambios) ====================
 async function precargarLista() {
 try {
 const res = await fetch(SCRIPT_URL);
@@ -603,6 +682,7 @@ const data = await res.json();
 archivos = data.archivos;
 classMedia = data.classMedia || [];
 configComercial = data.config;
+anfitriones = data.anfitriones || [];
 document.getElementById('header-app-title').innerText = configComercial.nombre;
 document.getElementById('brand-title').innerText = configComercial.nombre.toUpperCase();
 document.getElementById('adm-nombre').value = configComercial.nombre;
@@ -614,6 +694,7 @@ linksContainer.innerHTML = "";
 if(configComercial.adLinks && configComercial.adLinks.length) configComercial.adLinks.forEach(item => addAdLinkRow(item.title, item.url));
 document.getElementById('msg-espera').innerText = "Medios listos. Presione botón amarillo.";
 pdfFiles = classMedia.filter(f => f.mimeType.includes('pdf'));
+renderAnfitrionesAdmin();
 } catch(e) { setTimeout(precargarLista, 3000); }
 }
 function switchModule(moduleName, element) {
@@ -632,7 +713,7 @@ if(sistemaIniciado && !esPausado) toggleParar();
 if(moduleName === 'grabador') { document.getElementById('mod-grabador').classList.add('active'); document.getElementById('header-app-title').innerText = "ESTUDIO DE GRABACIÓN"; initWebcam(); }
 else if(moduleName === 'aula') { document.getElementById('mod-aula').classList.add('active'); document.getElementById('header-app-title').innerText = "AULA VIRTUAL ACTIVA"; }
 else if(moduleName === 'publicidad') { document.getElementById('mod-publicidad').classList.add('active'); document.getElementById('header-app-title').innerText = "VITRINA COMERCIAL"; renderPublicidadGrid(); }
-else if(moduleName === 'admin') { document.getElementById('mod-admin').classList.add('active'); document.getElementById('header-app-title').innerText = "CONFIGURACIÓN"; }
+else if(moduleName === 'admin') { document.getElementById('mod-admin').classList.add('active'); document.getElementById('header-app-title').innerText = "CONFIGURACIÓN"; renderAnfitrionesAdmin(); }
 }
 }
 function iniciarSistema() { if(archivos.length===0) return; sistemaIniciado=true; esPausado=false; audioHardware.play().catch(()=>{}); audioHardware.pause(); document.getElementById('overlay-inicio').style.display='none'; mostrarMedia(0); }
@@ -645,20 +726,89 @@ function toggleParar(){ const btn=document.getElementById('btn-parar'); if(!esPa
 function adelanteMediaManual(){ esPausado=false; apagarControles(); siguienteMedia(); }
 function regresarMedia(){ esPausado=false; apagarControles(); indexActual--; if(indexActual<0) indexActual=archivos.length-1; mostrarMedia(indexActual); }
 async function refrescarListaEnSegundoPlano(){ try{ const res=await fetch(SCRIPT_URL); const d=await res.json(); if(d.archivos && d.archivos.length) archivos=d.archivos; } catch(e){} }
-// ==================== FUNCIONES GRABADOR (originales) ====================
+
+// ==================== FUNCIONES GRABADOR (sin cambios) ====================
 async function initWebcam(){ try{ const stream=await navigator.mediaDevices.getUserMedia({audio:true, video:true}); document.getElementById('webcam-preview').srcObject=stream; } catch(err){ alert("Permisos de cámara y micrófono necesarios."); } }
 function startRecording(type){ typeRecording=type; recordedChunks=[]; const stream=document.getElementById('webcam-preview').srcObject; if(!stream) return; let options={ mimeType: type==='audio'?'audio/webm':'video/webm;codecs=vp8' }; mediaRecorder=new MediaRecorder(stream,options); mediaRecorder.ondataavailable=(e)=>{ if(e.data.size>0) recordedChunks.push(e.data); }; mediaRecorder.onstop=processStopRecording; mediaRecorder.start(); document.getElementById('rec-status').style.display='block'; document.getElementById('btn-stop-rec').disabled=false; document.getElementById('btn-start-audio').disabled=true; document.getElementById('btn-start-video').disabled=true; }
 function stopRecording(){ if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop(); document.getElementById('rec-status').style.display='none'; document.getElementById('btn-stop-rec').disabled=true; document.getElementById('btn-start-audio').disabled=false; document.getElementById('btn-start-video').disabled=false; }
 function processStopRecording(){ blobGrabado=new Blob(recordedChunks,{type:typeRecording==='audio'?'audio/mp3':'video/mp4'}); const url=URL.createObjectURL(blobGrabado); document.getElementById('recording-preview-box').style.display='block'; const audioPlayback=document.getElementById('audio-playback'); const videoPlayback=document.getElementById('video-playback'); if(typeRecording==='audio'){ videoPlayback.style.display='none'; audioPlayback.style.display='block'; audioPlayback.src=url; } else { audioPlayback.style.display='none'; videoPlayback.style.display='block'; videoPlayback.src=url; } }
 function uploadCapturedFile(){ if(!blobGrabado) return; const reader=new FileReader(); reader.readAsDataURL(blobGrabado); reader.onloadend=async function(){ const base64Data=reader.result; const extension=typeRecording==='audio'?'mp3':'mp4'; const nameFile=`Grabacion_${Date.now()}.${extension}`; alert("Subiendo..."); try{ const response=await fetch(SCRIPT_URL,{ method:'POST', body:JSON.stringify({ action:"uploadFile", fileName:nameFile, fileData:base64Data }) }); const resJson=await response.json(); if(resJson.success){ alert(`Archivo guardado en Drive.`); document.getElementById('recording-preview-box').style.display='none'; refrescarListaEnSegundoPlano(); } else alert("Error."); } catch(err){ alert("Error de red."); } }; }
-// ==================== FUNCIONES PUBLICIDAD (originales) ====================
+
+// ==================== FUNCIONES PUBLICIDAD (sin cambios) ====================
 function renderPublicidadGrid(){ const container=document.getElementById('publicidad-grid-container'); container.innerHTML=""; if(!configComercial.adLinks || configComercial.adLinks.length===0){ container.innerHTML="<p>No hay enlaces.</p>"; return; } configComercial.adLinks.forEach(ad=>{ const card=document.createElement('div'); card.className="ad-card"; card.innerHTML=`<div><h4>${ad.title}</h4><p>${ad.url}</p></div><button class="btn-control" onclick="openAdViewer('${ad.url}')">Ver</button>`; container.appendChild(card); }); }
 function openAdViewer(url){ document.getElementById('ad-viewer-wrapper').style.display="block"; document.getElementById('ad-iframe-browser').src=url; }
 function closeAdViewer(){ document.getElementById('ad-viewer-wrapper').style.display="none"; document.getElementById('ad-iframe-browser').src=""; }
-// ==================== FUNCIONES ADMIN (originales) ====================
+
+// ==================== FUNCIONES ADMIN (MODIFICADAS: + ANFITRIONES) ====================
 function addAdLinkRow(title="",url=""){ const container=document.getElementById('admin-links-rows'); const row=document.createElement('div'); row.style.display="flex"; row.style.gap="10px"; row.innerHTML=`<input type="text" placeholder="Título" class="form-control row-title" value="${title}"><input type="url" placeholder="URL" class="form-control row-url" value="${url}"><button type="button" class="btn-control btn-danger" onclick="this.parentElement.remove()">✖</button>`; container.appendChild(row); }
-async function saveAdminConfig(event){ event.preventDefault(); const nombre=document.getElementById('adm-nombre').value; const telefono=document.getElementById('adm-telefono').value; const instagram=document.getElementById('adm-instagram').value; const facebook=document.getElementById('adm-facebook').value; const adLinks=[]; document.querySelectorAll('.ad-link-row').forEach(row=>{ adLinks.push({ title:row.querySelector('.row-title').value, url:row.querySelector('.row-url').value }); }); alert("Guardando configuración..."); try{ const response=await fetch(SCRIPT_URL,{ method:'POST', body:JSON.stringify({ action:"saveConfig", nombre, telefono, instagram, facebook, adLinks }) }); const resJson=await response.json(); if(resJson.success){ alert("Configuración guardada."); location.reload(); } else alert("Error."); } catch(e){ alert("Error de red."); } }
-// ==================== FUNCIONES AULA VIRTUAL (mejoradas) ====================
+async function saveAdminConfig(event){ event.preventDefault(); const nombre=document.getElementById('adm-nombre').value; const telefono=document.getElementById('adm-telefono').value; const instagram=document.getElementById('adm-instagram').value; const facebook=document.getElementById('adm-facebook').value; const adLinks=[]; document.querySelectorAll('#admin-links-rows > div').forEach(row=>{ const titleInput = row.querySelector('input[placeholder="Título"]'); const urlInput = row.querySelector('input[placeholder="URL"]'); if(titleInput && urlInput) adLinks.push({ title:titleInput.value, url:urlInput.value }); }); alert("Guardando configuración..."); try{ const response=await fetch(SCRIPT_URL,{ method:'POST', body:JSON.stringify({ action:"saveConfig", nombre, telefono, instagram, facebook, adLinks }) }); const resJson=await response.json(); if(resJson.success){ alert("Configuración guardada."); location.reload(); } else alert("Error."); } catch(e){ alert("Error de red."); } }
+
+// ========== NUEVAS FUNCIONES: GESTIÓN DE ANFITRIONES ==========
+function renderAnfitrionesAdmin() {
+const container = document.getElementById('anfitriones-lista-admin');
+if(!anfitriones || anfitriones.length === 0) {
+container.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 20px;">No hay anfitriones registrados. Agrega uno arriba.</div>';
+return;
+}
+let html = '';
+anfitriones.forEach((h, idx) => {
+html += `
+<div class="anfitrion-item">
+<div class="anfitrion-info">
+<span class="anfitrion-nombre">⭐ ${h.nombre}</span>
+<span class="anfitrion-correo">${h.correo}</span>
+</div>
+<button class="btn-control btn-danger btn-pequeno" style="width:auto;" onclick="eliminarAnfitrion(${idx})">🗑️ Eliminar</button>
+</div>`;
+});
+container.innerHTML = html;
+}
+
+async function agregarAnfitrion() {
+const nombre = document.getElementById('new-host-name').value.trim();
+const correo = document.getElementById('new-host-email').value.trim().toLowerCase();
+if(!nombre || !correo) { alert("Completa nombre y correo del anfitrión."); return; }
+if(!correo.includes('@')) { alert("Correo inválido."); return; }
+try {
+const response = await fetch(SCRIPT_URL, {
+method: 'POST',
+body: JSON.stringify({ action: "addHost", nombre: nombre, correo: correo })
+});
+const data = await response.json();
+if(data.success) {
+alert(`Anfitrión "${nombre}" agregado correctamente.`);
+document.getElementById('new-host-name').value = '';
+document.getElementById('new-host-email').value = '';
+await precargarLista();
+} else {
+alert("Error: " + (data.error || "No se pudo agregar."));
+}
+} catch(e) {
+alert("Error de red al agregar anfitrión.");
+}
+}
+
+async function eliminarAnfitrion(index) {
+const host = anfitriones[index];
+if(!confirm(`¿Eliminar al anfitrión "${host.nombre}" (${host.correo})?`)) return;
+try {
+const response = await fetch(SCRIPT_URL, {
+method: 'POST',
+body: JSON.stringify({ action: "removeHost", correo: host.correo })
+});
+const data = await response.json();
+if(data.success) {
+alert("Anfitrión eliminado.");
+await precargarLista();
+} else {
+alert("Error al eliminar.");
+}
+} catch(e) {
+alert("Error de red.");
+}
+}
+
+// ==================== FUNCIONES AULA VIRTUAL (MODIFICADAS: DURACIÓN REAL + ANFITRIÓN) ====================
 async function conectarAulaVirtual() {
 const correo = document.getElementById('student-id-input').value.trim();
 if(!correo) { alert("Ingresa tu correo registrado."); return; }
@@ -670,23 +820,30 @@ try {
 const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "validarEstudiante", email: correo }) });
 const data = await response.json();
 if(data.success && data.autorizado) {
-estudianteActual = { nombre: data.nombre, correo: data.correo };
+estudianteActual = { nombre: data.nombre, correo: data.correo, esAnfitrion: data.esAnfitrion || false };
 containerAuth.style.display = "flex";
 containerNoAuth.style.display = "none";
-await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "joinClass", correo: estudianteActual.correo, nombre: estudianteActual.nombre }) });
-// ⚠️ CAMBIA AQUÍ TU CORREO DE ANFITRIÓN (opcional)
-const esAnfitrion = (estudianteActual.correo === "tutor@example.com");
-if(esAnfitrion) { /* controles ya visibles */ }
+// Mostrar indicador si es anfitrión
+const indicador = document.getElementById('indicador-anfitrion');
+if(estudianteActual.esAnfitrion) {
+indicador.style.display = 'block';
+indicador.innerHTML = `⭐ BIENVENIDO ANFITRIÓN: ${estudianteActual.nombre} — Tienes control total del aula`;
+} else {
+indicador.style.display = 'none';
+}
+await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "joinClass", correo: estudianteActual.correo, nombre: estudianteActual.nombre, esAnfitrion: estudianteActual.esAnfitrion }) });
 cargarEstudiantesActivos();
 cargarMensajesChat();
 iniciarPolling();
 seleccionarOpcionAula('clases');
-} else { alert("Correo no autorizado."); }
+} else { alert("Correo no autorizado. Contacta al administrador."); }
 } catch(e) { alert("Error de conexión."); }
 }
+
 function salirDelAula() {
 document.getElementById('aula-autenticado').style.display = "none";
 document.getElementById('aula-no-autenticado').style.display = "block";
+document.getElementById('indicador-anfitrion').style.display = "none";
 if(pollingInterval) clearInterval(pollingInterval);
 if(flotante) flotante.remove();
 flotante = null;
@@ -704,7 +861,7 @@ const data = await res.json();
 if(data.success) {
 const container = document.getElementById('conectados-lista');
 if(data.students.length === 0) container.innerHTML = "<div>No hay estudiantes conectados</div>";
-else { let html = ""; data.students.forEach(s => { html += `<div class="estudiante-item">👤 <strong>${s.nombre}</strong> (${s.correo})</div>`; }); container.innerHTML = html; }
+else { let html = ""; data.students.forEach(s => { const badge = s.esAnfitrion ? '<span class="badge-anfitrion">ANFITRIÓN</span>' : ''; html += `<div class="estudiante-item">👤 <strong>${s.nombre}</strong>${badge} <span style="color:#8fa0b0; font-size:0.75rem;">(${s.correo})</span></div>`; }); container.innerHTML = html; }
 }
 } catch(e) {}
 }
@@ -760,7 +917,6 @@ const elem = visor.querySelector('iframe, img, embed');
 if(elem) elem.style.transform = `scale(${zoomVisorActual})`;
 }
 }
-// ---------- Opciones del Aula ----------
 function seleccionarOpcionAula(opcion) {
 currentOpcionAula = opcion;
 document.querySelectorAll('.opcion-btn').forEach(btn => btn.classList.remove('active'));
@@ -776,9 +932,7 @@ if(!flotante) {
 flotante = document.createElement('div');
 flotante.className = 'floating-video';
 flotante.id = 'floating-video';
-// Limpiamos el nombre de la sala para evitar caracteres no soportados por Jitsi
 const roomName = document.getElementById('room-id-input').value.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
-// Se agrega allowfullscreen y permisos extendidos, además de desactivar la pantalla de pre-union para evitar bloqueos en iframe
 flotante.innerHTML = `<div class="floating-controls"><button onclick="maximizarFlotante()">🗖</button><button onclick="restaurarFlotante()">✖</button></div><iframe id="jitsi-iframe-flotante" src="https://${JITSI_SERVER}/${roomName}#config.startWithAudioMuted=false&config.startWithVideoMuted=false&config.prejoinPageDisabled=true" allow="camera *; microphone *; fullscreen *; display-capture *; autoplay *; clipboard-write *" allowfullscreen></iframe>`;
 document.body.appendChild(flotante);
 hacerArrastrable(flotante);
@@ -824,7 +978,6 @@ const jitsiFrame = visor.querySelector('iframe');
 if(jitsiFrame && jitsiFrame.src.includes(JITSI_SERVER)) {
 const contenidoFlotante = document.getElementById('contenido-flotante');
 const contenidoHTML = contenidoFlotante ? contenidoFlotante.innerHTML : '';
-// Restablecemos los permisos correctos al intercambiar de vuelta
 flotante.innerHTML = `<div class="floating-controls"><button onclick="maximizarFlotante()">🗖</button><button onclick="restaurarFlotante()">✖</button></div><iframe id="jitsi-iframe-flotante" src="${jitsiFrame.src}" allow="camera *; microphone *; fullscreen *; display-capture *; autoplay *; clipboard-write *" allowfullscreen></iframe>`;
 jitsiIframe = document.getElementById('jitsi-iframe-flotante');
 visor.innerHTML = contenidoHTML;
@@ -834,6 +987,8 @@ if(elem) elem.style.transform = `scale(${zoomVisorActual})`;
 }
 }
 function recargarJitsi() { if(jitsiIframe) { const src = jitsiIframe.src; jitsiIframe.src = ''; setTimeout(() => { jitsiIframe.src = src; }, 500); } }
+
+// ========== CORREGIDO: mostrarMediaClase ahora usa duración REAL ==========
 function mostrarMediaClase() {
 if(reproductorPausado) return;
 if(!mediaListAula.length) return;
@@ -841,45 +996,91 @@ const file = mediaListAula[currentMediaIndex];
 const contenedor = ventanasIntercambiadas ? (document.getElementById('contenido-flotante') || document.getElementById('visor-aula')) : document.getElementById('visor-aula');
 if(!contenedor) return;
 contenedor.innerHTML = '';
+if(mediaTimerAula) clearTimeout(mediaTimerAula);
 let elemento;
+
 if(file.mimeType.includes('video')) {
 const iframe = document.createElement('iframe');
 iframe.src = `https://drive.google.com/file/d/${file.id}/preview?autoplay=1`;
 iframe.allow = "autoplay; fullscreen";
 iframe.style.width = "100%"; iframe.style.height = "100%";
 elemento = iframe;
+contenedor.appendChild(elemento);
+// ⭐ DURACIÓN REAL DEL VIDEO (desde el backend)
+const duracionMs = file.duracion && file.duracion > 0 ? file.duracion : TIEMPO_VIDEO_DEFECTO;
+mediaTimerAula = setTimeout(() => { if(!reproductorPausado) { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaClase(); } }, duracionMs);
+
 } else if(file.mimeType.includes('image')) {
 const img = document.createElement('img');
 img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1920`;
 img.style.width = "100%"; img.style.height = "100%"; img.style.objectFit = "contain";
 elemento = img;
+contenedor.appendChild(elemento);
+mediaTimerAula = setTimeout(() => { if(!reproductorPausado) { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaClase(); } }, TIEMPO_IMAGEN);
+
 } else if(file.mimeType.includes('audio')) {
+// ⭐ AUDIO CON DURACIÓN REAL detectada automáticamente
 let imagenPrevia = "";
 for(let i=currentMediaIndex-1; i>=0; i--) { if(mediaListAula[i].mimeType.includes('image')) { imagenPrevia = `https://drive.google.com/thumbnail?id=${mediaListAula[i].id}&sz=w1920`; break; } }
 if(!imagenPrevia) imagenPrevia = "https://via.placeholder.com/1920x1080?text=Reproduciendo+audio";
 const div = document.createElement('div'); div.style.width="100%"; div.style.height="100%"; div.style.position="relative";
 const imgFondo = document.createElement('img'); imgFondo.src = imagenPrevia; imgFondo.style.width="100%"; imgFondo.style.height="100%"; imgFondo.style.objectFit="cover";
 div.appendChild(imgFondo);
-const audioPlayer = document.createElement('audio'); audioPlayer.src = file.audioBase64; audioPlayer.autoplay = true; audioPlayer.controls = true;
-audioPlayer.style.position = "absolute"; audioPlayer.style.bottom = "20px"; audioPlayer.style.left = "50%"; audioPlayer.style.transform = "translateX(-50%)"; audioPlayer.style.width = "80%"; audioPlayer.style.zIndex = "10";
+
+const audioPlayer = document.createElement('audio');
+audioPlayer.src = file.audioBase64;
+audioPlayer.autoplay = true;
+audioPlayer.controls = true;
+audioPlayer.style.position = "absolute";
+audioPlayer.style.bottom = "20px";
+audioPlayer.style.left = "50%";
+audioPlayer.style.transform = "translateX(-50%)";
+audioPlayer.style.width = "80%";
+audioPlayer.style.zIndex = "10";
 div.appendChild(audioPlayer);
 elemento = div;
-audioPlayer.onended = () => { if(!reproductorPausado) { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaClase(); } };
+contenedor.appendChild(elemento);
+
+// ⭐ CLAVE: Escuchar loadedmetadata para obtener la duración REAL del audio
+audioPlayer.addEventListener('loadedmetadata', () => {
+const duracionReal = audioPlayer.duration;
+if(duracionReal && isFinite(duracionReal) && duracionReal > 0) {
+// Programar el siguiente medio basado en la duración real exacta
+if(mediaTimerAula) clearTimeout(mediaTimerAula);
+mediaTimerAula = setTimeout(() => {
+if(!reproductorPausado) { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaClase(); }
+}, (duracionReal * 1000) + 500); // +500ms de margen
+}
+});
+
+// Respaldo: si loadedmetadata no dispara (ej: error), usar ended
+audioPlayer.onended = () => {
+if(!reproductorPausado) {
+if(mediaTimerAula) clearTimeout(mediaTimerAula);
+currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length;
+mostrarMediaClase();
+}
+};
+
+// Respaldo adicional por si el audio no carga
+audioPlayer.onerror = () => {
+if(mediaTimerAula) clearTimeout(mediaTimerAula);
+const duracionFallback = file.duracion && file.duracion > 0 ? file.duracion : TIEMPO_AUDIO_RESPALDO;
+mediaTimerAula = setTimeout(() => { if(!reproductorPausado) { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaClase(); } }, duracionFallback);
+};
+
 } else if(file.mimeType.includes('pdf')) {
 const embed = document.createElement('embed');
 embed.src = `https://drive.google.com/viewerng/viewer?embedded=true&url=https://drive.google.com/uc?id=${file.id}`;
 embed.type = "application/pdf"; embed.style.width="100%"; embed.style.height="100%";
 elemento = embed;
-} else return;
 contenedor.appendChild(elemento);
-if(elemento.style) elemento.style.transform = `scale(${zoomVisorActual})`;
-if(mediaTimerAula) clearTimeout(mediaTimerAula);
-let duracion = TIEMPO_IMAGEN;
-if(file.mimeType.includes('video')) duracion = file.duracion || TIEMPO_VIDEO_DEFECTO;
-else if(file.mimeType.includes('audio')) duracion = file.duracion || 30000;
-else if(file.mimeType.includes('pdf')) duracion = 15000;
-mediaTimerAula = setTimeout(() => { if(!reproductorPausado) { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaClase(); } }, duracion);
+mediaTimerAula = setTimeout(() => { if(!reproductorPausado) { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaClase(); } }, 15000);
+} else return;
+
+if(elemento && elemento.style) elemento.style.transform = `scale(${zoomVisorActual})`;
 }
+
 function toggleReproduccionClase() {
 const btn = document.getElementById('btn-pause-play-clase');
 if(reproductorPausado) { reproductorPausado = false; btn.innerHTML = "⏸ Pausar"; mostrarMediaClase(); }
@@ -910,29 +1111,39 @@ else if(currentOpcionAula === 'pdfs') mostrarListaPDFs();
 };
 }; input.click();
 }
-// ==================== FUNCIONES AUXILIARES DEL AULA (originales) ====================
+
+// ==================== FUNCIONES AUXILIARES DEL AULA (MODIFICADAS: DURACIÓN REAL) ====================
 function iniciarReproductorAula() {
 const multimedia = classMedia.filter(f => f.mimeType.includes('video') || f.mimeType.includes('image'));
 if(multimedia.length === 0) { document.getElementById('visor-aula').innerHTML = '<div style="text-align:center; color:red;">No hay videos o imágenes.</div>'; return; }
 mediaListAula = multimedia; currentMediaIndex = 0;
 mostrarMediaAula();
 }
+
+// ========== CORREGIDO: mostrarMediaAula también usa duración REAL ==========
 function mostrarMediaAula() {
 if(!mediaListAula.length) return;
 const file = mediaListAula[currentMediaIndex];
 const visor = document.getElementById('visor-aula'); visor.innerHTML = '';
+if(mediaTimerAula) clearTimeout(mediaTimerAula);
+
 if(file.mimeType.includes('video')) {
-const iframe = document.createElement('iframe'); iframe.src = `https://drive.google.com/file/d/${file.id}/preview?autoplay=1`; iframe.allow = "autoplay; fullscreen"; iframe.style.width="100%"; iframe.style.height="100%";
+const iframe = document.createElement('iframe');
+iframe.src = `https://drive.google.com/file/d/${file.id}/preview?autoplay=1`;
+iframe.allow = "autoplay; fullscreen";
+iframe.style.width="100%"; iframe.style.height="100%";
 visor.appendChild(iframe);
-if(mediaTimerAula) clearTimeout(mediaTimerAula);
-mediaTimerAula = setTimeout(() => { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaAula(); }, file.duracion||TIEMPO_VIDEO_DEFECTO);
+const duracionMs = file.duracion && file.duracion > 0 ? file.duracion : TIEMPO_VIDEO_DEFECTO;
+mediaTimerAula = setTimeout(() => { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaAula(); }, duracionMs);
 } else if(file.mimeType.includes('image')) {
-const img = document.createElement('img'); img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1920`; img.style.width="100%"; img.style.height="100%"; img.style.objectFit="contain";
+const img = document.createElement('img');
+img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1920`;
+img.style.width="100%"; img.style.height="100%"; img.style.objectFit="contain";
 visor.appendChild(img);
-if(mediaTimerAula) clearTimeout(mediaTimerAula);
 mediaTimerAula = setTimeout(() => { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaAula(); }, TIEMPO_IMAGEN);
 }
 }
+
 function mostrarListaPDFs() {
 const visor = document.getElementById('visor-aula');
 if(pdfFiles.length === 0) { visor.innerHTML = '<div style="text-align:center; color:red;">No se encontraron PDFs.</div>'; return; }
