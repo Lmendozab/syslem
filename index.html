@@ -1,987 +1,948 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Plataforma Multimedia HM-BC Comercial</title>
-    <style>
-        /* ========== ESTILOS EXISTENTES (sin cambios) ========== */
-        :root {
-            --bg-primary: #000c14;
-            --bg-sidebar: #001220;
-            --bg-card: #001f38;
-            --accent-gold: #D4AF37;
-            --accent-cyan: #00d2ff;
-            --text-light: #ffffff;
-            --text-muted: #8fa0b0;
-        }
-        body {
-            margin: 0;
-            background: var(--bg-primary);
-            color: var(--text-light);
-            font-family: 'Segoe UI', Arial, sans-serif;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-        #sidebar {
-            width: 260px;
-            background: var(--bg-sidebar);
-            border-right: 2px solid var(--accent-cyan);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-sizing: border-box;
-            z-index: 10;
-        }
-        .sidebar-brand { padding: 20px; font-size: 1.3rem; font-weight: bold; text-align: center; border-bottom: 1px solid rgba(0,210,255,0.2); }
-        .sidebar-menu { list-style: none; padding: 0; margin: 10px 0; flex-grow: 1; overflow-y: auto; }
-        .sidebar-item { padding: 14px 20px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 600; color: var(--text-muted); transition: all 0.2s ease; }
-        .sidebar-item:hover, .sidebar-item.active { color: var(--text-light); background: linear-gradient(90deg, #001a30 0%, #003366 100%); border-left: 4px solid var(--accent-gold); }
-        #main-content { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; position: relative; }
-        #top-header { background: linear-gradient(90deg, #001220 0%, #003366 100%); border-bottom: 3px solid var(--accent-cyan); padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; height: 70px; box-sizing: border-box; }
-        #top-header h1 { margin: 0; font-size: 1.4rem; }
-        .header-controls { display: flex; align-items: center; gap: 12px; }
-        .btn-control { background: var(--bg-sidebar); color: var(--accent-gold); border: 2px solid var(--accent-gold); padding: 6px 14px; font-size: 0.95rem; font-weight: bold; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; }
-        .btn-control:hover { background: var(--accent-gold); color: #000; box-shadow: 0 0 10px var(--accent-gold); }
-        .btn-danger { background: #1a0000; color: #ff4d4d; border: 2px solid #ff4d4d; }
-        .btn-danger:hover { background: #ff4d4d; color: #000; }
-        #clock { font-size: 1.4rem; color: var(--accent-cyan); font-family: monospace; }
-        #counter { font-size: 1.3rem; font-weight: bold; color: var(--accent-gold); background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 8px; border: 1px solid var(--accent-gold); }
-        #media-timer { font-size: 1.3rem; font-weight: bold; color: var(--accent-cyan); font-family: monospace; background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 8px; border: 1px solid var(--accent-cyan); min-width: 90px; text-align: center; }
-        .app-module { display: none; flex-grow: 1; padding: 30px; overflow-y: auto; box-sizing: border-box; }
-        .app-module.active { display: flex; flex-direction: column; }
-        .card-panel { background: var(--bg-card); border: 1px solid rgba(0,210,255,0.2); border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
-        h2.module-title { margin-top: 0; color: var(--accent-cyan); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
-        .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px; }
-        .form-group label { font-weight: bold; color: var(--accent-gold); font-size: 0.95rem; }
-        .form-control { background: var(--bg-primary); border: 1px solid var(--text-muted); border-radius: 6px; padding: 10px; color: #fff; font-size: 1rem; outline: none; }
-        .form-control:focus { border-color: var(--accent-cyan); }
-        #viewer-container { flex-grow: 1; background: #000; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; border-radius: 12px; }
-        #media-content { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
-        #media-content iframe, #media-content img { max-width: 100%; max-height: 100%; width: 100%; height: 100%; border: none; object-fit: contain; transition: transform 0.3s ease; }
-        #overlay-inicio { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 100; display: flex; justify-content: center; align-items: center; border-radius: 12px; }
-        #btn-play { background: var(--accent-gold); color: #000; border: none; padding: 18px 40px; font-size: 1.6rem; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px var(--accent-gold); }
-        .ad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 15px; }
-        .ad-card { background: var(--bg-sidebar); border: 2px solid var(--accent-gold); border-radius: 10px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
-        .recording-zone { display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 20px; background: var(--bg-sidebar); border-radius: 10px; border: 1px dashed var(--accent-cyan); }
-        #webcam-preview { width: 100%; max-width: 480px; height: auto; background: #000; border-radius: 8px; transform: scaleX(-1); }
-        .recording-status { font-weight: bold; color: #ff4d4d; animation: blink 1s infinite alternate; display: none; }
-        @keyframes sonando { 0% { transform: scaleY(0.3); } 100% { transform: scaleY(1.3); } }
-        .barrita { width: 6px; height: 35px; background: var(--accent-gold); animation: sonando 0.5s infinite alternate ease-in-out; }
-        @keyframes blink { 0% { opacity: 0.3; } 100% { opacity: 1; } }
-
-        /* ========== NUEVOS ESTILOS PARA EL PANEL IZQUIERDO DEL AULA ========== */
-        .aula-layout {
-            display: flex;
-            gap: 20px;
-            height: 100%;
-            min-height: 500px;
-            transition: all 0.3s;
-        }
-        .aula-panel-izquierdo {
-            width: 240px;
-            background: var(--bg-sidebar);
-            border-radius: 12px;
-            border: 1px solid var(--accent-cyan);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding: 15px;
-        }
-        .aula-contenido {
-            flex: 3;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .aula-panel-derecho {
-            flex: 1.2;
-            background: var(--bg-sidebar);
-            border-radius: 12px;
-            border: 1px solid var(--accent-cyan);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: all 0.3s;
-        }
-        .aula-panel-derecho.oculto {
-            display: none;
-        }
-        .aula-opciones {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-        }
-        .opcion-btn {
-            background: var(--bg-primary);
-            border: 1px solid var(--accent-gold);
-            color: var(--accent-gold);
-            padding: 8px 16px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-        .opcion-btn.active {
-            background: var(--accent-gold);
-            color: #000;
-            box-shadow: 0 0 10px var(--accent-gold);
-        }
-        .visor-aula {
-            background: #000;
-            border-radius: 12px;
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid #2a4c6e;
-            transition: all 0.3s;
-        }
-        .visor-aula iframe, .visor-aula img, .visor-aula embed, .visor-aula video {
-            width: 100%;
-            height: 100%;
-            border: none;
-            object-fit: contain;
-            transition: transform 0.3s;
-        }
-        .visor-aula.pantalla-completa {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 2000;
-            border-radius: 0;
-            margin: 0;
-        }
-        /* Ventana flotante del anfitrión (original) */
-        .floating-video {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 320px;
-            height: 240px;
-            z-index: 1000;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            border: 2px solid var(--accent-gold);
-            background: #000;
-            cursor: move;
-            resize: both;
-        }
-        .floating-video iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        .floating-controls {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            display: flex;
-            gap: 5px;
-            z-index: 1001;
-        }
-        .floating-controls button {
-            background: rgba(0,0,0,0.7);
-            color: white;
-            border: 1px solid var(--accent-gold);
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            padding: 2px 6px;
-        }
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            border-top: 1px solid rgba(0,210,255,0.3);
-            padding-top: 10px;
-        }
-        .control-label {
-            font-size: 0.8rem;
-            color: var(--accent-gold);
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .interruptor-linea {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.4s;
-            border-radius: 24px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: var(--accent-gold);
-        }
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-        .btn-pequeno {
-            padding: 5px 10px;
-            font-size: 0.8rem;
-            width: 100%;
-        }
-        .lista-estudiantes {
-            padding: 15px;
-            border-bottom: 1px solid rgba(0,210,255,0.3);
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .lista-estudiantes h4 {
-            margin: 0 0 10px 0;
-            color: var(--accent-gold);
-            font-size: 1rem;
-        }
-        .estudiante-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 0;
-            font-size: 0.85rem;
-            border-bottom: 1px dotted rgba(255,255,255,0.1);
-        }
-        .chat-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 15px;
-            gap: 10px;
-            overflow: hidden;
-        }
-        .chat-mensajes {
-            flex: 1;
-            overflow-y: auto;
-            background: rgba(0,0,0,0.3);
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 0.85rem;
-        }
-        .mensaje {
-            margin-bottom: 8px;
-            border-bottom: 1px solid #2a4c6e;
-            padding: 5px;
-        }
-        .mensaje-usuario {
-            color: var(--accent-gold);
-            font-weight: bold;
-        }
-        .mensaje-texto {
-            color: #ddd;
-            word-break: break-word;
-        }
-        .chat-input-area {
-            display: flex;
-            gap: 8px;
-        }
-        .chat-input-area input {
-            flex: 1;
-            background: var(--bg-primary);
-            border: 1px solid var(--accent-cyan);
-            border-radius: 20px;
-            padding: 8px 12px;
-            color: white;
-        }
-        .pdf-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .pdf-item {
-            background: var(--bg-sidebar);
-            border: 1px solid var(--accent-cyan);
-            border-radius: 6px;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        .pdf-item:hover {
-            background: var(--accent-cyan);
-            color: #000;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Plataforma Multimedia HM-BC Comercial</title>
+<style>
+/* ========== ESTILOS EXISTENTES (sin cambios) ========== */
+:root {
+--bg-primary: #000c14;
+--bg-sidebar: #001220;
+--bg-card: #001f38;
+--accent-gold: #D4AF37;
+--accent-cyan: #00d2ff;
+--text-light: #ffffff;
+--text-muted: #8fa0b0;
+}
+body {
+margin: 0;
+background: var(--bg-primary);
+color: var(--text-light);
+font-family: 'Segoe UI', Arial, sans-serif;
+display: flex;
+height: 100vh;
+overflow: hidden;
+}
+#sidebar {
+width: 260px;
+background: var(--bg-sidebar);
+border-right: 2px solid var(--accent-cyan);
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+box-sizing: border-box;
+z-index: 10;
+}
+.sidebar-brand { padding: 20px; font-size: 1.3rem; font-weight: bold; text-align: center; border-bottom: 1px solid rgba(0,210,255,0.2); }
+.sidebar-menu { list-style: none; padding: 0; margin: 10px 0; flex-grow: 1; overflow-y: auto; }
+.sidebar-item { padding: 14px 20px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 600; color: var(--text-muted); transition: all 0.2s ease; }
+.sidebar-item:hover, .sidebar-item.active { color: var(--text-light); background: linear-gradient(90deg, #001a30 0%, #003366 100%); border-left: 4px solid var(--accent-gold); }
+#main-content { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; position: relative; }
+#top-header { background: linear-gradient(90deg, #001220 0%, #003366 100%); border-bottom: 3px solid var(--accent-cyan); padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; height: 70px; box-sizing: border-box; }
+#top-header h1 { margin: 0; font-size: 1.4rem; }
+.header-controls { display: flex; align-items: center; gap: 12px; }
+.btn-control { background: var(--bg-sidebar); color: var(--accent-gold); border: 2px solid var(--accent-gold); padding: 6px 14px; font-size: 0.95rem; font-weight: bold; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; }
+.btn-control:hover { background: var(--accent-gold); color: #000; box-shadow: 0 0 10px var(--accent-gold); }
+.btn-danger { background: #1a0000; color: #ff4d4d; border: 2px solid #ff4d4d; }
+.btn-danger:hover { background: #ff4d4d; color: #000; }
+#clock { font-size: 1.4rem; color: var(--accent-cyan); font-family: monospace; }
+#counter { font-size: 1.3rem; font-weight: bold; color: var(--accent-gold); background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 8px; border: 1px solid var(--accent-gold); }
+#media-timer { font-size: 1.3rem; font-weight: bold; color: var(--accent-cyan); font-family: monospace; background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 8px; border: 1px solid var(--accent-cyan); min-width: 90px; text-align: center; }
+.app-module { display: none; flex-grow: 1; padding: 30px; overflow-y: auto; box-sizing: border-box; }
+.app-module.active { display: flex; flex-direction: column; }
+.card-panel { background: var(--bg-card); border: 1px solid rgba(0,210,255,0.2); border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+h2.module-title { margin-top: 0; color: var(--accent-cyan); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+.form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-weight: bold; color: var(--accent-gold); font-size: 0.95rem; }
+.form-control { background: var(--bg-primary); border: 1px solid var(--text-muted); border-radius: 6px; padding: 10px; color: #fff; font-size: 1rem; outline: none; }
+.form-control:focus { border-color: var(--accent-cyan); }
+#viewer-container { flex-grow: 1; background: #000; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; border-radius: 12px; }
+#media-content { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
+#media-content iframe, #media-content img { max-width: 100%; max-height: 100%; width: 100%; height: 100%; border: none; object-fit: contain; transition: transform 0.3s ease; }
+#overlay-inicio { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 100; display: flex; justify-content: center; align-items: center; border-radius: 12px; }
+#btn-play { background: var(--accent-gold); color: #000; border: none; padding: 18px 40px; font-size: 1.6rem; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px var(--accent-gold); }
+.ad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 15px; }
+.ad-card { background: var(--bg-sidebar); border: 2px solid var(--accent-gold); border-radius: 10px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
+.recording-zone { display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 20px; background: var(--bg-sidebar); border-radius: 10px; border: 1px dashed var(--accent-cyan); }
+#webcam-preview { width: 100%; max-width: 480px; height: auto; background: #000; border-radius: 8px; transform: scaleX(-1); }
+.recording-status { font-weight: bold; color: #ff4d4d; animation: blink 1s infinite alternate; display: none; }
+@keyframes sonando { 0% { transform: scaleY(0.3); } 100% { transform: scaleY(1.3); } }
+.barrita { width: 6px; height: 35px; background: var(--accent-gold); animation: sonando 0.5s infinite alternate ease-in-out; }
+@keyframes blink { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+/* ========== NUEVOS ESTILOS PARA EL PANEL IZQUIERDO DEL AULA ========== */
+.aula-layout {
+display: flex;
+gap: 20px;
+height: 100%;
+min-height: 500px;
+transition: all 0.3s;
+}
+.aula-panel-izquierdo {
+width: 240px;
+background: var(--bg-sidebar);
+border-radius: 12px;
+border: 1px solid var(--accent-cyan);
+display: flex;
+flex-direction: column;
+gap: 15px;
+padding: 15px;
+}
+.aula-contenido {
+flex: 3;
+display: flex;
+flex-direction: column;
+gap: 15px;
+}
+.aula-panel-derecho {
+flex: 1.2;
+background: var(--bg-sidebar);
+border-radius: 12px;
+border: 1px solid var(--accent-cyan);
+display: flex;
+flex-direction: column;
+overflow: hidden;
+transition: all 0.3s;
+}
+.aula-panel-derecho.oculto {
+display: none;
+}
+.aula-opciones {
+display: flex;
+gap: 10px;
+flex-wrap: wrap;
+margin-bottom: 10px;
+}
+.opcion-btn {
+background: var(--bg-primary);
+border: 1px solid var(--accent-gold);
+color: var(--accent-gold);
+padding: 8px 16px;
+border-radius: 30px;
+cursor: pointer;
+font-weight: bold;
+transition: all 0.2s;
+}
+.opcion-btn.active {
+background: var(--accent-gold);
+color: #000;
+box-shadow: 0 0 10px var(--accent-gold);
+}
+.visor-aula {
+background: #000;
+border-radius: 12px;
+min-height: 400px;
+display: flex;
+align-items: center;
+justify-content: center;
+position: relative;
+overflow: hidden;
+border: 1px solid #2a4c6e;
+transition: all 0.3s;
+}
+.visor-aula iframe, .visor-aula img, .visor-aula embed, .visor-aula video {
+width: 100%;
+height: 100%;
+border: none;
+object-fit: contain;
+transition: transform 0.3s;
+}
+.visor-aula.pantalla-completa {
+position: fixed;
+top: 0;
+left: 0;
+width: 100vw;
+height: 100vh;
+z-index: 2000;
+border-radius: 0;
+margin: 0;
+}
+/* Ventana flotante del anfitrión (original) */
+.floating-video {
+position: fixed;
+bottom: 20px;
+right: 20px;
+width: 320px;
+height: 240px;
+z-index: 1000;
+border-radius: 12px;
+overflow: hidden;
+box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+border: 2px solid var(--accent-gold);
+background: #000;
+cursor: move;
+resize: both;
+}
+.floating-video iframe {
+width: 100%;
+height: 100%;
+border: none;
+}
+.floating-controls {
+position: absolute;
+top: 5px;
+right: 5px;
+display: flex;
+gap: 5px;
+z-index: 1001;
+}
+.floating-controls button {
+background: rgba(0,0,0,0.7);
+color: white;
+border: 1px solid var(--accent-gold);
+border-radius: 4px;
+cursor: pointer;
+font-size: 12px;
+padding: 2px 6px;
+}
+.control-group {
+display: flex;
+flex-direction: column;
+gap: 8px;
+border-top: 1px solid rgba(0,210,255,0.3);
+padding-top: 10px;
+}
+.control-label {
+font-size: 0.8rem;
+color: var(--accent-gold);
+font-weight: bold;
+margin-bottom: 5px;
+}
+.interruptor-linea {
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.switch {
+position: relative;
+display: inline-block;
+width: 50px;
+height: 24px;
+}
+.switch input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+.slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #ccc;
+transition: 0.4s;
+border-radius: 24px;
+}
+.slider:before {
+position: absolute;
+content: "";
+height: 18px;
+width: 18px;
+left: 3px;
+bottom: 3px;
+background-color: white;
+transition: 0.4s;
+border-radius: 50%;
+}
+input:checked + .slider {
+background-color: var(--accent-gold);
+}
+input:checked + .slider:before {
+transform: translateX(26px);
+}
+.btn-pequeno {
+padding: 5px 10px;
+font-size: 0.8rem;
+width: 100%;
+}
+.lista-estudiantes {
+padding: 15px;
+border-bottom: 1px solid rgba(0,210,255,0.3);
+max-height: 200px;
+overflow-y: auto;
+}
+.lista-estudiantes h4 {
+margin: 0 0 10px 0;
+color: var(--accent-gold);
+font-size: 1rem;
+}
+.estudiante-item {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 6px 0;
+font-size: 0.85rem;
+border-bottom: 1px dotted rgba(255,255,255,0.1);
+}
+.chat-container {
+flex: 1;
+display: flex;
+flex-direction: column;
+padding: 15px;
+gap: 10px;
+overflow: hidden;
+}
+.chat-mensajes {
+flex: 1;
+overflow-y: auto;
+background: rgba(0,0,0,0.3);
+border-radius: 8px;
+padding: 10px;
+font-size: 0.85rem;
+}
+.mensaje {
+margin-bottom: 8px;
+border-bottom: 1px solid #2a4c6e;
+padding: 5px;
+}
+.mensaje-usuario {
+color: var(--accent-gold);
+font-weight: bold;
+}
+.mensaje-texto {
+color: #ddd;
+word-break: break-word;
+}
+.chat-input-area {
+display: flex;
+gap: 8px;
+}
+.chat-input-area input {
+flex: 1;
+background: var(--bg-primary);
+border: 1px solid var(--accent-cyan);
+border-radius: 20px;
+padding: 8px 12px;
+color: white;
+}
+.pdf-list {
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+margin-bottom: 15px;
+}
+.pdf-item {
+background: var(--bg-sidebar);
+border: 1px solid var(--accent-cyan);
+border-radius: 6px;
+padding: 6px 12px;
+cursor: pointer;
+font-size: 0.8rem;
+}
+.pdf-item:hover {
+background: var(--accent-cyan);
+color: #000;
+}
+</style>
 </head>
 <body>
-
 <audio id="global-audio" style="display: none;"></audio>
-
 <div id="sidebar">
-    <div>
-        <div class="sidebar-brand" id="brand-title">AGENCIA MULTIMEDIA</div>
-        <nav>
-            <ul style="margin:0; padding:0;">
-                <li class="sidebar-item active" onclick="switchModule('cartelera', this)">📺 Cartelera Digital</li>
-                <li class="sidebar-item" onclick="switchModule('grabador', this)">🎙️ Grabador Multimedia</li>
-                <li class="sidebar-item" onclick="switchModule('aula', this)">🏫 Aula Virtual (Clases)</li>
-                <li class="sidebar-item" onclick="switchModule('publicidad', this)">🌐 Vitrina de Publicidad</li>
-                <li class="sidebar-item" onclick="switchModule('admin', this)">📊 Panel Administrativo</li>
-            </ul>
-        </nav>
-    </div>
-    <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; font-size: 0.8rem; color: var(--text-muted);">
-        HM-BC Platform v3.0
-    </div>
+<div>
+<div class="sidebar-brand" id="brand-title">AGENCIA MULTIMEDIA</div>
+<nav>
+<ul style="margin:0; padding:0;">
+<li class="sidebar-item active" onclick="switchModule('cartelera', this)">📺 Cartelera Digital</li>
+<li class="sidebar-item" onclick="switchModule('grabador', this)">🎙️ Grabador Multimedia</li>
+<li class="sidebar-item" onclick="switchModule('aula', this)">🏫 Aula Virtual (Clases)</li>
+<li class="sidebar-item" onclick="switchModule('publicidad', this)">🌐 Vitrina de Publicidad</li>
+<li class="sidebar-item" onclick="switchModule('admin', this)">📊 Panel Administrativo</li>
+</ul>
+</nav>
 </div>
-
+<div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; font-size: 0.8rem; color: var(--text-muted);">
+HM-BC Platform v3.0
+</div>
+</div>
 <div id="main-content">
-    <div id="top-header">
-        <h1 id="header-app-title">CARGANDO PLATAFORMA...</h1>
-        <div class="header-controls">
-            <div id="cartelera-controls" style="display: flex; align-items: center; gap: 10px;">
-                <button class="btn-control" onclick="regresarMedia()">◀ Regresar</button>
-                <button class="btn-control" id="btn-parar" onclick="toggleParar()">Parar █</button>
-                <button class="btn-control" onclick="adelanteMediaManual()">Adelante ▶</button>
-                <div id="counter">0 / 0</div>
-                <select class="btn-control" id="zoom-select" onchange="cambiarZoom(this.value)">
-                    <option value="1.00">Zoom: 100%</option>
-                    <option value="1.10">Zoom: 110%</option>
-                    <option value="1.20" selected>Zoom: 120%</option>
-                    <option value="1.30">Zoom: 130%</option>
-                    <option value="1.40">Zoom: 140%</option>
-                    <option value="1.50">Zoom: 150%</option>
-                </select>
-                <div id="media-timer">00:00</div>
-            </div>
-            <div id="clock">00:00:00</div>
-        </div>
-    </div>
-
-    <!-- MÓDULO CARTELERA (original) -->
-    <div id="mod-cartelera" class="app-module active">
-        <div id="viewer-container">
-            <div id="overlay-inicio" onclick="iniciarSistema()">
-                <button id="btn-play">▶ INICIAR REPRODUCCIÓN</button>
-            </div>
-            <div id="media-content">
-                <h2 id="msg-espera" style="text-align: center; color: var(--text-muted);">Sincronizando la plataforma comercial...</h2>
-            </div>
-        </div>
-    </div>
-
-    <!-- MÓDULO GRABADOR (original) -->
-    <div id="mod-grabador" class="app-module">
-        <div class="card-panel">
-            <h2 class="module-title">Grabación y Generación de Contenido Inmediato</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Graba audio o video con cámara web. Se almacena en Drive.</p>
-            <div class="recording-zone">
-                <span class="recording-status" id="rec-status">🔴 GRABANDO EN VIVO</span>
-                <video id="webcam-preview" autoplay muted></video>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn-control" id="btn-start-audio" onclick="startRecording('audio')">🎙️ Grabar Podcast</button>
-                    <button class="btn-control" id="btn-start-video" onclick="startRecording('video')">🎥 Grabar Video</button>
-                    <button class="btn-control btn-danger" id="btn-stop-rec" onclick="stopRecording()" disabled>█ Detener</button>
-                </div>
-                <div id="recording-preview-box" style="display:none; width:100%; text-align:center; margin-top:15px;">
-                    <h4 style="color: var(--accent-gold);">Previsualización</h4>
-                    <audio id="audio-playback" controls style="display:none;"></audio>
-                    <video id="video-playback" controls style="display:none; width:100%; max-width:400px;"></video>
-                    <br><button class="btn-control" style="border-color:#00ff66; color:#00ff66;" onclick="uploadCapturedFile()">☁️ Subir a Drive</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MÓDULO AULA VIRTUAL (MODIFICADO: AGREGADO PANEL IZQUIERDO Y FUNCIONES) -->
-    <div id="mod-aula" class="app-module">
-        <div class="card-panel" style="height: 90%; display: flex; flex-direction: column;">
-            <h2 class="module-title">Aula Virtual - Control de Acceso + Contenidos</h2>
-            <div style="display: flex; gap: 15px; margin-bottom: 20px; background: var(--bg-sidebar); padding: 15px; border-radius: 8px; flex-wrap: wrap;">
-                <div class="form-group" style="flex:1; min-width:200px;">
-                    <label>Sala / Taller</label>
-                    <input type="text" id="room-id-input" class="form-control" value="Clase_Agencia_Luis_Mendoza">
-                </div>
-                <div class="form-group" style="flex:1; min-width:250px;">
-                    <label>Correo Registrado</label>
-                    <input type="email" id="student-id-input" class="form-control" placeholder="estudiante@correo.com">
-                </div>
-                <div style="display: flex; align-items: flex-end;">
-                    <button class="btn-control" style="border-color: var(--accent-cyan);" onclick="conectarAulaVirtual()">🔒 Validar e Ingresar</button>
-                </div>
-            </div>
-
-            <div id="aula-autenticado" style="display: none; flex-grow: 1; flex-direction: column; gap: 15px;">
-                <div class="aula-layout" id="aulaLayout">
-                    <!-- NUEVO PANEL LATERAL IZQUIERDO DE CONTROLES -->
-                    <div class="aula-panel-izquierdo">
-                        <div class="control-group">
-                            <div class="control-label">Controles de Chat</div>
-                            <div class="interruptor-linea">
-                                <span style="font-size:0.8rem;">Mostrar panel</span>
-                                <label class="switch">
-                                    <input type="checkbox" id="togglePanelCheckbox" checked onchange="togglePanelDerecho()">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <div class="control-label">Pantalla completa</div>
-                            <div class="interruptor-linea">
-                                <span style="font-size:0.8rem;">Modo presentación</span>
-                                <label class="switch">
-                                    <input type="checkbox" id="fullscreenToggle" onchange="toggleFullscreenVisor()">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <div class="control-label">Zoom del visor</div>
-                            <select id="visorZoomSelect" class="form-control" style="font-size:0.8rem; padding:5px;" onchange="cambiarZoomVisor(this.value)">
-                                <option value="0.8">80%</option>
-                                <option value="1.0" selected>100%</option>
-                                <option value="1.2">120%</option>
-                            </select>
-                        </div>
-                        <div class="control-group">
-                            <div class="control-label">Intercambiar ventanas</div>
-                            <div class="interruptor-linea">
-                                <span style="font-size:0.8rem;">Cambiar cámara ↔ contenido</span>
-                                <label class="switch">
-                                    <input type="checkbox" id="swapWindowsToggle" onchange="intercambiarVentanas()">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <div class="control-label">Control de cámara/audio</div>
-                            <button class="btn-control btn-pequeno" onclick="recargarJitsi()">🔁 Reconectar cámara/audio</button>
-                            <small style="font-size:0.7rem; color:#8fa0b0;">Usa los botones dentro de la ventana de video</small>
-                        </div>
-                        <div class="control-group">
-                            <div class="control-label">Reproductor</div>
-                            <button class="btn-control btn-pequeno" id="btn-pause-play-clase" onclick="toggleReproduccionClase()">⏸ Pausar</button>
-                            <button class="btn-control btn-pequeno" onclick="anteriorMediaClase()">⏪ Anterior</button>
-                            <button class="btn-control btn-pequeno" onclick="siguienteMediaClase()">Siguiente ⏩</button>
-                            <button class="btn-control btn-pequeno" onclick="recargarMediaClase()">🔄 Recargar</button>
-                            <button class="btn-control btn-pequeno" onclick="subirArchivoClase()">📤 Subir archivo</button>
-                        </div>
-                        <div class="control-group">
-                            <button class="btn-control btn-danger btn-pequeno" onclick="salirDelAula()">🚪 Salir del Aula</button>
-                        </div>
-                    </div>
-
-                    <!-- Columna central: contenido principal (visor) -->
-                    <div class="aula-contenido">
-                        <div class="aula-opciones">
-                            <button class="opcion-btn active" data-opcion="clases" onclick="seleccionarOpcionAula('clases')">🎥 Clases / Cursos Online</button>
-                            <button class="opcion-btn" data-opcion="videos" onclick="seleccionarOpcionAula('videos')">🎬 Reproducir Videos/Imágenes</button>
-                            <button class="opcion-btn" data-opcion="pdfs" onclick="seleccionarOpcionAula('pdfs')">📄 Mostrar PDFs</button>
-                        </div>
-                        <div class="visor-aula" id="visor-aula">
-                            <div style="text-align:center; color:#8fa0b0;">Selecciona una opción para comenzar</div>
-                        </div>
-                    </div>
-
-                    <!-- Columna derecha: estudiantes + chat (original) -->
-                    <div class="aula-panel-derecho" id="panelDerecho">
-                        <div class="lista-estudiantes" id="lista-estudiantes-panel">
-                            <h4>👥 Estudiantes Conectados</h4>
-                            <div id="conectados-lista">Cargando...</div>
-                        </div>
-                        <div class="chat-container">
-                            <div class="chat-mensajes" id="chat-mensajes">
-                                <div style="color:gray;">Mensajes del aula...</div>
-                            </div>
-                            <div class="chat-input-area">
-                                <input type="text" id="chat-input" placeholder="Escribe tu mensaje..." maxlength="200">
-                                <button class="btn-control" onclick="enviarMensajeChat()">Enviar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="aula-no-autenticado" style="text-align:center; padding: 40px; color: var(--text-muted);">
-                Por favor valida tu correo para acceder al aula.
-            </div>
-        </div>
-    </div>
-
-    <!-- MÓDULO PUBLICIDAD (original) -->
-    <div id="mod-publicidad" class="app-module">
-        <div class="card-panel">
-            <h2 class="module-title">Enlaces Comerciales</h2>
-            <div class="ad-grid" id="publicidad-grid-container"></div>
-        </div>
-        <div class="card-panel" id="ad-viewer-wrapper" style="display: none;">
-            <div style="display: flex; justify-content: space-between;">
-                <h4 id="ad-viewer-title" style="color:var(--accent-gold);">Navegador</h4>
-                <button class="btn-control btn-danger" onclick="closeAdViewer()">Cerrar</button>
-            </div>
-            <iframe id="ad-iframe-browser" style="width:100%; height:500px; border:2px solid var(--accent-gold); border-radius:8px;"></iframe>
-        </div>
-    </div>
-
-    <!-- MÓDULO ADMIN (original) -->
-    <div id="mod-admin" class="app-module">
-        <div class="card-panel">
-            <h2 class="module-title">Configuración Administrativa</h2>
-            <form id="admin-config-form" onsubmit="saveAdminConfig(event)">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="form-group"><label>Empresa</label><input type="text" id="adm-nombre" class="form-control" required></div>
-                    <div class="form-group"><label>Teléfono</label><input type="text" id="adm-telefono" class="form-control" required></div>
-                    <div class="form-group"><label>Instagram</label><input type="text" id="adm-instagram" class="form-control"></div>
-                    <div class="form-group"><label>Facebook</label><input type="text" id="adm-facebook" class="form-control"></div>
-                </div>
-                <h3 style="color:var(--accent-cyan);">Enlaces Publicitarios</h3>
-                <div id="admin-links-rows" style="display:flex; flex-direction:column; gap:10px;"></div>
-                <button type="button" class="btn-control" style="margin-top:10px;" onclick="addAdLinkRow('','')">+ Añadir Enlace</button>
-                <div style="margin-top:30px; text-align:right;">
-                    <button type="submit" class="btn-control" style="border-color:#00ff66; color:#00ff66;">💾 Guardar Configuración</button>
-                </div>
-            </form>
-        </div>
-    </div>
+<div id="top-header">
+<h1 id="header-app-title">CARGANDO PLATAFORMA...</h1>
+<div class="header-controls">
+<div id="cartelera-controls" style="display: flex; align-items: center; gap: 10px;">
+<button class="btn-control" onclick="regresarMedia()">◀ Regresar</button>
+<button class="btn-control" id="btn-parar" onclick="toggleParar()">Parar █</button>
+<button class="btn-control" onclick="adelanteMediaManual()">Adelante ▶</button>
+<div id="counter">0 / 0</div>
+<select class="btn-control" id="zoom-select" onchange="cambiarZoom(this.value)">
+<option value="1.00">Zoom: 100%</option>
+<option value="1.10">Zoom: 110%</option>
+<option value="1.20" selected>Zoom: 120%</option>
+<option value="1.30">Zoom: 130%</option>
+<option value="1.40">Zoom: 140%</option>
+<option value="1.50">Zoom: 150%</option>
+</select>
+<div id="media-timer">00:00</div>
 </div>
-
+<div id="clock">00:00:00</div>
+</div>
+</div>
+<!-- MÓDULO CARTELERA (original) -->
+<div id="mod-cartelera" class="app-module active">
+<div id="viewer-container">
+<div id="overlay-inicio" onclick="iniciarSistema()">
+<button id="btn-play">▶ INICIAR REPRODUCCIÓN</button>
+</div>
+<div id="media-content">
+<h2 id="msg-espera" style="text-align: center; color: var(--text-muted);">Sincronizando la plataforma comercial...</h2>
+</div>
+</div>
+</div>
+<!-- MÓDULO GRABADOR (original) -->
+<div id="mod-grabador" class="app-module">
+<div class="card-panel">
+<h2 class="module-title">Grabación y Generación de Contenido Inmediato</h2>
+<p style="color: var(--text-muted); font-size: 0.9rem;">Graba audio o video con cámara web. Se almacena en Drive.</p>
+<div class="recording-zone">
+<span class="recording-status" id="rec-status">🔴 GRABANDO EN VIVO</span>
+<video id="webcam-preview" autoplay muted></video>
+<div style="display: flex; gap: 10px;">
+<button class="btn-control" id="btn-start-audio" onclick="startRecording('audio')">🎙️ Grabar Podcast</button>
+<button class="btn-control" id="btn-start-video" onclick="startRecording('video')">🎥 Grabar Video</button>
+<button class="btn-control btn-danger" id="btn-stop-rec" onclick="stopRecording()" disabled>█ Detener</button>
+</div>
+<div id="recording-preview-box" style="display:none; width:100%; text-align:center; margin-top:15px;">
+<h4 style="color: var(--accent-gold);">Previsualización</h4>
+<audio id="audio-playback" controls style="display:none;"></audio>
+<video id="video-playback" controls style="display:none; width:100%; max-width:400px;"></video>
+<br><button class="btn-control" style="border-color:#00ff66; color:#00ff66;" onclick="uploadCapturedFile()">☁️ Subir a Drive</button>
+</div>
+</div>
+</div>
+</div>
+<!-- MÓDULO AULA VIRTUAL (MODIFICADO: AGREGADO PANEL IZQUIERDO Y FUNCIONES) -->
+<div id="mod-aula" class="app-module">
+<div class="card-panel" style="height: 90%; display: flex; flex-direction: column;">
+<h2 class="module-title">Aula Virtual - Control de Acceso + Contenidos</h2>
+<div style="display: flex; gap: 15px; margin-bottom: 20px; background: var(--bg-sidebar); padding: 15px; border-radius: 8px; flex-wrap: wrap;">
+<div class="form-group" style="flex:1; min-width:200px;">
+<label>Sala / Taller</label>
+<input type="text" id="room-id-input" class="form-control" value="Clase_Agencia_Luis_Mendoza">
+</div>
+<div class="form-group" style="flex:1; min-width:250px;">
+<label>Correo Registrado</label>
+<input type="email" id="student-id-input" class="form-control" placeholder="estudiante@correo.com">
+</div>
+<div style="display: flex; align-items: flex-end;">
+<button class="btn-control" style="border-color: var(--accent-cyan);" onclick="conectarAulaVirtual()">🔒 Validar e Ingresar</button>
+</div>
+</div>
+<div id="aula-autenticado" style="display: none; flex-grow: 1; flex-direction: column; gap: 15px;">
+<div class="aula-layout" id="aulaLayout">
+<!-- NUEVO PANEL LATERAL IZQUIERDO DE CONTROLES -->
+<div class="aula-panel-izquierdo">
+<div class="control-group">
+<div class="control-label">Controles de Chat</div>
+<div class="interruptor-linea">
+<span style="font-size:0.8rem;">Mostrar panel</span>
+<label class="switch">
+<input type="checkbox" id="togglePanelCheckbox" checked onchange="togglePanelDerecho()">
+<span class="slider"></span>
+</label>
+</div>
+</div>
+<div class="control-group">
+<div class="control-label">Pantalla completa</div>
+<div class="interruptor-linea">
+<span style="font-size:0.8rem;">Modo presentación</span>
+<label class="switch">
+<input type="checkbox" id="fullscreenToggle" onchange="toggleFullscreenVisor()">
+<span class="slider"></span>
+</label>
+</div>
+</div>
+<div class="control-group">
+<div class="control-label">Zoom del visor</div>
+<select id="visorZoomSelect" class="form-control" style="font-size:0.8rem; padding:5px;" onchange="cambiarZoomVisor(this.value)">
+<option value="0.8">80%</option>
+<option value="1.0" selected>100%</option>
+<option value="1.2">120%</option>
+</select>
+</div>
+<div class="control-group">
+<div class="control-label">Intercambiar ventanas</div>
+<div class="interruptor-linea">
+<span style="font-size:0.8rem;">Cambiar cámara ↔ contenido</span>
+<label class="switch">
+<input type="checkbox" id="swapWindowsToggle" onchange="intercambiarVentanas()">
+<span class="slider"></span>
+</label>
+</div>
+</div>
+<div class="control-group">
+<div class="control-label">Control de cámara/audio</div>
+<button class="btn-control btn-pequeno" onclick="recargarJitsi()">🔁 Reconectar cámara/audio</button>
+<small style="font-size:0.7rem; color:#8fa0b0;">Usa los botones dentro de la ventana de video</small>
+</div>
+<div class="control-group">
+<div class="control-label">Reproductor</div>
+<button class="btn-control btn-pequeno" id="btn-pause-play-clase" onclick="toggleReproduccionClase()">⏸ Pausar</button>
+<button class="btn-control btn-pequeno" onclick="anteriorMediaClase()">⏪ Anterior</button>
+<button class="btn-control btn-pequeno" onclick="siguienteMediaClase()">Siguiente ⏩</button>
+<button class="btn-control btn-pequeno" onclick="recargarMediaClase()">🔄 Recargar</button>
+<button class="btn-control btn-pequeno" onclick="subirArchivoClase()">📤 Subir archivo</button>
+</div>
+<div class="control-group">
+<button class="btn-control btn-danger btn-pequeno" onclick="salirDelAula()">🚪 Salir del Aula</button>
+</div>
+</div>
+<!-- Columna central: contenido principal (visor) -->
+<div class="aula-contenido">
+<div class="aula-opciones">
+<button class="opcion-btn active" data-opcion="clases" onclick="seleccionarOpcionAula('clases')">🎥 Clases / Cursos Online</button>
+<button class="opcion-btn" data-opcion="videos" onclick="seleccionarOpcionAula('videos')">🎬 Reproducir Videos/Imágenes</button>
+<button class="opcion-btn" data-opcion="pdfs" onclick="seleccionarOpcionAula('pdfs')">📄 Mostrar PDFs</button>
+</div>
+<div class="visor-aula" id="visor-aula">
+<div style="text-align:center; color:#8fa0b0;">Selecciona una opción para comenzar</div>
+</div>
+</div>
+<!-- Columna derecha: estudiantes + chat (original) -->
+<div class="aula-panel-derecho" id="panelDerecho">
+<div class="lista-estudiantes" id="lista-estudiantes-panel">
+<h4>👥 Estudiantes Conectados</h4>
+<div id="conectados-lista">Cargando...</div>
+</div>
+<div class="chat-container">
+<div class="chat-mensajes" id="chat-mensajes">
+<div style="color:gray;">Mensajes del aula...</div>
+</div>
+<div class="chat-input-area">
+<input type="text" id="chat-input" placeholder="Escribe tu mensaje..." maxlength="200">
+<button class="btn-control" onclick="enviarMensajeChat()">Enviar</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="aula-no-autenticado" style="text-align:center; padding: 40px; color: var(--text-muted);">
+Por favor valida tu correo para acceder al aula.
+</div>
+</div>
+</div>
+<!-- MÓDULO PUBLICIDAD (original) -->
+<div id="mod-publicidad" class="app-module">
+<div class="card-panel">
+<h2 class="module-title">Enlaces Comerciales</h2>
+<div class="ad-grid" id="publicidad-grid-container"></div>
+</div>
+<div class="card-panel" id="ad-viewer-wrapper" style="display: none;">
+<div style="display: flex; justify-content: space-between;">
+<h4 id="ad-viewer-title" style="color:var(--accent-gold);">Navegador</h4>
+<button class="btn-control btn-danger" onclick="closeAdViewer()">Cerrar</button>
+</div>
+<iframe id="ad-iframe-browser" style="width:100%; height:500px; border:2px solid var(--accent-gold); border-radius:8px;"></iframe>
+</div>
+</div>
+<!-- MÓDULO ADMIN (original) -->
+<div id="mod-admin" class="app-module">
+<div class="card-panel">
+<h2 class="module-title">Configuración Administrativa</h2>
+<form id="admin-config-form" onsubmit="saveAdminConfig(event)">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+<div class="form-group"><label>Empresa</label><input type="text" id="adm-nombre" class="form-control" required></div>
+<div class="form-group"><label>Teléfono</label><input type="text" id="adm-telefono" class="form-control" required></div>
+<div class="form-group"><label>Instagram</label><input type="text" id="adm-instagram" class="form-control"></div>
+<div class="form-group"><label>Facebook</label><input type="text" id="adm-facebook" class="form-control"></div>
+</div>
+<h3 style="color:var(--accent-cyan);">Enlaces Publicitarios</h3>
+<div id="admin-links-rows" style="display:flex; flex-direction:column; gap:10px;"></div>
+<button type="button" class="btn-control" style="margin-top:10px;" onclick="addAdLinkRow('','')">+ Añadir Enlace</button>
+<div style="margin-top:30px; text-align:right;">
+<button type="submit" class="btn-control" style="border-color:#00ff66; color:#00ff66;">💾 Guardar Configuración</button>
+</div>
+</form>
+</div>
+</div>
+</div>
 <script>
-    // ==================== CONFIGURACIÓN GLOBAL ====================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyiNm-r8Ue9SISKpvJfGqW5E9OV4b7sr_y8DvXp7gZm4BC32Zb9hrktAhIvfmMVFwQ/exec"; // ⚠️ REEMPLAZAR CON TU URL
-    const JITSI_SERVER = "meet.ffmuc.net";
-    const TIEMPO_IMAGEN = 5000;
-    const TIEMPO_VIDEO_DEFECTO = 30000;
-    const TIEMPO_AUDIO_RESPALDO = 15000;
-
-    let archivos = [];
-    let classMedia = [];
-    let configComercial = {};
-    let indexActual = 0;
-    let reproductorTimer = null;
-    let clockTimer = null;
-    let tiempoTranscurridoSimulado = 0;
-    let tiempoTotalSimulado = 0;
-    let sistemaIniciado = false;
-    let esPausado = false;
-    let scaleActual = 1.20;
-
-    let mediaRecorder = null;
-    let recordedChunks = [];
-    let typeRecording = "";
-    let blobGrabado = null;
-    const audioHardware = document.getElementById('global-audio');
-
-    // Variables Aula Virtual (nuevas)
-    let estudianteActual = { nombre: "", correo: "" };
-    let currentOpcionAula = "clases";
-    let pdfFiles = [];
-    let mediaTimerAula = null;
-    let currentMediaIndex = 0;
-    let mediaListAula = [];
-    let flotante = null;
-    let reproductorPausado = false;
-    let zoomVisorActual = 1.0;
-    let ventanasIntercambiadas = false;
-    let jitsiIframe = null;
-    let pollingInterval = null;
-
-    // Reloj Venezuela
-    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('es-VE'); }, 1000);
-    function formatTime(seconds) { if (isNaN(seconds) || seconds < 0) return "00:00"; let m = Math.floor(seconds/60).toString().padStart(2,'0'); let s = Math.floor(seconds%60).toString().padStart(2,'0'); return `${m}:${s}`; }
-
-    // ==================== FUNCIONES CARTELERA (originales) ====================
-    async function precargarLista() {
-        try {
-            const res = await fetch(SCRIPT_URL);
-            const data = await res.json();
-            archivos = data.archivos;
-            classMedia = data.classMedia || [];
-            configComercial = data.config;
-            document.getElementById('header-app-title').innerText = configComercial.nombre;
-            document.getElementById('brand-title').innerText = configComercial.nombre.toUpperCase();
-            document.getElementById('adm-nombre').value = configComercial.nombre;
-            document.getElementById('adm-telefono').value = configComercial.telefono;
-            document.getElementById('adm-instagram').value = configComercial.instagram;
-            document.getElementById('adm-facebook').value = configComercial.facebook;
-            const linksContainer = document.getElementById('admin-links-rows');
-            linksContainer.innerHTML = "";
-            if(configComercial.adLinks && configComercial.adLinks.length) configComercial.adLinks.forEach(item => addAdLinkRow(item.title, item.url));
-            document.getElementById('msg-espera').innerText = "Medios listos. Presione botón amarillo.";
-            pdfFiles = classMedia.filter(f => f.mimeType.includes('pdf'));
-        } catch(e) { setTimeout(precargarLista, 3000); }
-    }
-
-    function switchModule(moduleName, element) {
-        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-        element.classList.add('active');
-        document.querySelectorAll('.app-module').forEach(el => el.classList.remove('active'));
-        const ctrlCartelera = document.getElementById('cartelera-controls');
-        if(moduleName === 'cartelera') {
-            ctrlCartelera.style.display = 'flex';
-            document.getElementById('mod-cartelera').classList.add('active');
-            document.getElementById('header-app-title').innerText = configComercial.nombre || "CARTELERA DIGITAL";
-            if(sistemaIniciado && esPausado) toggleParar();
-        } else {
-            ctrlCartelera.style.display = 'none';
-            if(sistemaIniciado && !esPausado) toggleParar();
-            if(moduleName === 'grabador') { document.getElementById('mod-grabador').classList.add('active'); document.getElementById('header-app-title').innerText = "ESTUDIO DE GRABACIÓN"; initWebcam(); }
-            else if(moduleName === 'aula') { document.getElementById('mod-aula').classList.add('active'); document.getElementById('header-app-title').innerText = "AULA VIRTUAL ACTIVA"; }
-            else if(moduleName === 'publicidad') { document.getElementById('mod-publicidad').classList.add('active'); document.getElementById('header-app-title').innerText = "VITRINA COMERCIAL"; renderPublicidadGrid(); }
-            else if(moduleName === 'admin') { document.getElementById('mod-admin').classList.add('active'); document.getElementById('header-app-title').innerText = "CONFIGURACIÓN"; }
-        }
-    }
-
-    function iniciarSistema() { if(archivos.length===0) return; sistemaIniciado=true; esPausado=false; audioHardware.play().catch(()=>{}); audioHardware.pause(); document.getElementById('overlay-inicio').style.display='none'; mostrarMedia(0); }
-    function apagarControles() { clearTimeout(reproductorTimer); clearInterval(clockTimer); audioHardware.pause(); audioHardware.src=""; audioHardware.onended=null; audioHardware.ontimeupdate=null; document.getElementById('media-timer').innerText="00:00"; }
-    function cambiarZoom(valor) { scaleActual=parseFloat(valor); ajustarEscalaVisual(); }
-    function ajustarEscalaVisual() { document.querySelectorAll('#media-content img, #media-content iframe').forEach(el => el.style.transform=`scale(${scaleActual})`); }
-    function mostrarMedia(i) { if(!sistemaIniciado || esPausado) return; const container = document.getElementById('media-content'); const file = archivos[i]; document.getElementById('counter').innerText=`${i+1}/${archivos.length}`; apagarControles(); container.innerHTML=""; if(file.mimeType.includes('video')){ const ifr=document.createElement('iframe'); ifr.src=`https://drive.google.com/file/d/${file.id}/preview?autoplay=1`; ifr.allow="autoplay; fullscreen"; container.appendChild(ifr); let tiempoEspera=file.duracion||TIEMPO_VIDEO_DEFECTO; tiempoTranscurridoSimulado=0; tiempoTotalSimulado=Math.floor(tiempoEspera/1000); document.getElementById('media-timer').innerText=`00:00 / ${formatTime(tiempoTotalSimulado)}`; clockTimer=setInterval(()=>{ if(!esPausado){ tiempoTranscurridoSimulado++; if(tiempoTranscurridoSimulado<=tiempoTotalSimulado) document.getElementById('media-timer').innerText=`${formatTime(tiempoTranscurridoSimulado)} / ${formatTime(tiempoTotalSimulado)}`; } },1000); reproductorTimer=setTimeout(siguienteMedia,tiempoEspera); } else if(file.mimeType.includes('audio')){ let imagenPreviaUrl=""; for(let k=i-1;k>=0;k--) if(!archivos[k].mimeType.includes('video') && !archivos[k].mimeType.includes('audio')){ imagenPreviaUrl=`https://drive.google.com/thumbnail?id=${archivos[k].id}&sz=w1920`; break; } if(!imagenPreviaUrl) for(let k=archivos.length-1;k>=0;k--) if(!archivos[k].mimeType.includes('video') && !archivos[k].mimeType.includes('audio')){ imagenPreviaUrl=`https://drive.google.com/thumbnail?id=${archivos[k].id}&sz=w1920`; break; } if(imagenPreviaUrl){ const imgFondo=document.createElement('img'); imgFondo.src=imagenPreviaUrl; container.appendChild(imgFondo); const audioBanner=document.createElement('div'); audioBanner.style.position='absolute'; audioBanner.style.bottom='30px'; audioBanner.style.left='50%'; audioBanner.style.transform='translateX(-50%)'; audioBanner.style.background='rgba(0,18,32,0.85)'; audioBanner.style.border='2px solid #D4AF37'; audioBanner.style.borderRadius='12px'; audioBanner.style.padding='12px 25px'; audioBanner.style.display='flex'; audioBanner.style.alignItems='center'; audioBanner.style.gap='25px'; audioBanner.style.zIndex='10'; audioBanner.innerHTML=`<div><div style="font-size:1.1rem; color:#D4AF37;">🔊 VOICE OVER</div><div style="font-size:0.85rem;">${file.name}</div></div><div style="display:flex; gap:5px;"><div class="barrita"></div><div class="barrita"></div><div class="barrita"></div><div class="barrita"></div></div>`; container.appendChild(audioBanner); } if(file.audioBase64){ audioHardware.src=file.audioBase64; audioHardware.play().catch(()=>{ reproductorTimer=setTimeout(siguienteMedia,TIEMPO_AUDIO_RESPALDO); }); audioHardware.ontimeupdate=function(){ document.getElementById('media-timer').innerText=`${formatTime(audioHardware.currentTime)} / ${formatTime(audioHardware.duration)}`; }; audioHardware.onended=function(){ siguienteMedia(); }; } else { reproductorTimer=setTimeout(siguienteMedia,5000); } } else { const img=document.createElement('img'); img.src=`https://drive.google.com/thumbnail?id=${file.id}&sz=w1920`; container.appendChild(img); tiempoTranscurridoSimulado=0; tiempoTotalSimulado=Math.floor(TIEMPO_IMAGEN/1000); document.getElementById('media-timer').innerText=`00:00 / ${formatTime(tiempoTotalSimulado)}`; clockTimer=setInterval(()=>{ if(!esPausado){ tiempoTranscurridoSimulado++; if(tiempoTranscurridoSimulado<=tiempoTotalSimulado) document.getElementById('media-timer').innerText=`${formatTime(tiempoTranscurridoSimulado)} / ${formatTime(tiempoTotalSimulado)}`; } },1000); reproductorTimer=setTimeout(siguienteMedia,TIEMPO_IMAGEN); } ajustarEscalaVisual(); }
-    function siguienteMedia(){ if(esPausado) return; indexActual++; if(indexActual>=archivos.length){ indexActual=0; mostrarMedia(indexActual); refrescarListaEnSegundoPlano(); return; } mostrarMedia(indexActual); }
-    function toggleParar(){ const btn=document.getElementById('btn-parar'); if(!esPausado){ esPausado=true; btn.innerText="Reanudar ▶"; btn.style.background="#D4AF37"; btn.style.color="#000"; clearTimeout(reproductorTimer); audioHardware.pause(); } else { esPausado=false; btn.innerText="Parar █"; btn.style.background="#001220"; btn.style.color="#D4AF37"; if(archivos[indexActual].mimeType.includes('audio') && audioHardware.src) audioHardware.play().catch(()=>{}); else { let tiempoRestante=(tiempoTotalSimulado-tiempoTranscurridoSimulado)*1000; if(tiempoRestante<=0) tiempoRestante=1000; reproductorTimer=setTimeout(siguienteMedia,tiempoRestante); } } }
-    function adelanteMediaManual(){ esPausado=false; apagarControles(); siguienteMedia(); }
-    function regresarMedia(){ esPausado=false; apagarControles(); indexActual--; if(indexActual<0) indexActual=archivos.length-1; mostrarMedia(indexActual); }
-    async function refrescarListaEnSegundoPlano(){ try{ const res=await fetch(SCRIPT_URL); const d=await res.json(); if(d.archivos && d.archivos.length) archivos=d.archivos; } catch(e){} }
-
-    // ==================== FUNCIONES GRABADOR (originales) ====================
-    async function initWebcam(){ try{ const stream=await navigator.mediaDevices.getUserMedia({audio:true, video:true}); document.getElementById('webcam-preview').srcObject=stream; } catch(err){ alert("Permisos de cámara y micrófono necesarios."); } }
-    function startRecording(type){ typeRecording=type; recordedChunks=[]; const stream=document.getElementById('webcam-preview').srcObject; if(!stream) return; let options={ mimeType: type==='audio'?'audio/webm':'video/webm;codecs=vp8' }; mediaRecorder=new MediaRecorder(stream,options); mediaRecorder.ondataavailable=(e)=>{ if(e.data.size>0) recordedChunks.push(e.data); }; mediaRecorder.onstop=processStopRecording; mediaRecorder.start(); document.getElementById('rec-status').style.display='block'; document.getElementById('btn-stop-rec').disabled=false; document.getElementById('btn-start-audio').disabled=true; document.getElementById('btn-start-video').disabled=true; }
-    function stopRecording(){ if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop(); document.getElementById('rec-status').style.display='none'; document.getElementById('btn-stop-rec').disabled=true; document.getElementById('btn-start-audio').disabled=false; document.getElementById('btn-start-video').disabled=false; }
-    function processStopRecording(){ blobGrabado=new Blob(recordedChunks,{type:typeRecording==='audio'?'audio/mp3':'video/mp4'}); const url=URL.createObjectURL(blobGrabado); document.getElementById('recording-preview-box').style.display='block'; const audioPlayback=document.getElementById('audio-playback'); const videoPlayback=document.getElementById('video-playback'); if(typeRecording==='audio'){ videoPlayback.style.display='none'; audioPlayback.style.display='block'; audioPlayback.src=url; } else { audioPlayback.style.display='none'; videoPlayback.style.display='block'; videoPlayback.src=url; } }
-    function uploadCapturedFile(){ if(!blobGrabado) return; const reader=new FileReader(); reader.readAsDataURL(blobGrabado); reader.onloadend=async function(){ const base64Data=reader.result; const extension=typeRecording==='audio'?'mp3':'mp4'; const nameFile=`Grabacion_${Date.now()}.${extension}`; alert("Subiendo..."); try{ const response=await fetch(SCRIPT_URL,{ method:'POST', body:JSON.stringify({ action:"uploadFile", fileName:nameFile, fileData:base64Data }) }); const resJson=await response.json(); if(resJson.success){ alert(`Archivo guardado en Drive.`); document.getElementById('recording-preview-box').style.display='none'; refrescarListaEnSegundoPlano(); } else alert("Error."); } catch(err){ alert("Error de red."); } }; }
-
-    // ==================== FUNCIONES PUBLICIDAD (originales) ====================
-    function renderPublicidadGrid(){ const container=document.getElementById('publicidad-grid-container'); container.innerHTML=""; if(!configComercial.adLinks || configComercial.adLinks.length===0){ container.innerHTML="<p>No hay enlaces.</p>"; return; } configComercial.adLinks.forEach(ad=>{ const card=document.createElement('div'); card.className="ad-card"; card.innerHTML=`<div><h4>${ad.title}</h4><p>${ad.url}</p></div><button class="btn-control" onclick="openAdViewer('${ad.url}')">Ver</button>`; container.appendChild(card); }); }
-    function openAdViewer(url){ document.getElementById('ad-viewer-wrapper').style.display="block"; document.getElementById('ad-iframe-browser').src=url; }
-    function closeAdViewer(){ document.getElementById('ad-viewer-wrapper').style.display="none"; document.getElementById('ad-iframe-browser').src=""; }
-
-    // ==================== FUNCIONES ADMIN (originales) ====================
-    function addAdLinkRow(title="",url=""){ const container=document.getElementById('admin-links-rows'); const row=document.createElement('div'); row.style.display="flex"; row.style.gap="10px"; row.innerHTML=`<input type="text" placeholder="Título" class="form-control row-title" value="${title}"><input type="url" placeholder="URL" class="form-control row-url" value="${url}"><button type="button" class="btn-control btn-danger" onclick="this.parentElement.remove()">✖</button>`; container.appendChild(row); }
-    async function saveAdminConfig(event){ event.preventDefault(); const nombre=document.getElementById('adm-nombre').value; const telefono=document.getElementById('adm-telefono').value; const instagram=document.getElementById('adm-instagram').value; const facebook=document.getElementById('adm-facebook').value; const adLinks=[]; document.querySelectorAll('.ad-link-row').forEach(row=>{ adLinks.push({ title:row.querySelector('.row-title').value, url:row.querySelector('.row-url').value }); }); alert("Guardando configuración..."); try{ const response=await fetch(SCRIPT_URL,{ method:'POST', body:JSON.stringify({ action:"saveConfig", nombre, telefono, instagram, facebook, adLinks }) }); const resJson=await response.json(); if(resJson.success){ alert("Configuración guardada."); location.reload(); } else alert("Error."); } catch(e){ alert("Error de red."); } }
-
-    // ==================== FUNCIONES AULA VIRTUAL (mejoradas) ====================
-    async function conectarAulaVirtual() {
-        const correo = document.getElementById('student-id-input').value.trim();
-        if(!correo) { alert("Ingresa tu correo registrado."); return; }
-        const containerAuth = document.getElementById('aula-autenticado');
-        const containerNoAuth = document.getElementById('aula-no-autenticado');
-        containerAuth.style.display = "none";
-        containerNoAuth.style.display = "block";
-        try {
-            const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "validarEstudiante", email: correo }) });
-            const data = await response.json();
-            if(data.success && data.autorizado) {
-                estudianteActual = { nombre: data.nombre, correo: data.correo };
-                containerAuth.style.display = "flex";
-                containerNoAuth.style.display = "none";
-                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "joinClass", correo: estudianteActual.correo, nombre: estudianteActual.nombre }) });
-                // ⚠️ CAMBIA AQUÍ TU CORREO DE ANFITRIÓN (opcional)
-                const esAnfitrion = (estudianteActual.correo === "tutor@example.com");
-                if(esAnfitrion) { /* controles ya visibles */ }
-                cargarEstudiantesActivos();
-                cargarMensajesChat();
-                iniciarPolling();
-                seleccionarOpcionAula('clases');
-            } else { alert("Correo no autorizado."); }
-        } catch(e) { alert("Error de conexión."); }
-    }
-
-    function salirDelAula() {
-        document.getElementById('aula-autenticado').style.display = "none";
-        document.getElementById('aula-no-autenticado').style.display = "block";
-        if(pollingInterval) clearInterval(pollingInterval);
-        if(flotante) flotante.remove();
-        flotante = null;
-        document.getElementById('visor-aula').innerHTML = '<div style="text-align:center; color:#8fa0b0;">Selecciona una opción para comenzar</div>';
-        currentOpcionAula = "clases";
-        reproductorPausado = false;
-        if(mediaTimerAula) clearTimeout(mediaTimerAula);
-        document.getElementById('swapWindowsToggle').checked = false;
-        ventanasIntercambiadas = false;
-    }
-
-    async function cargarEstudiantesActivos() {
-        try {
-            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "getActiveStudents" }) });
-            const data = await res.json();
-            if(data.success) {
-                const container = document.getElementById('conectados-lista');
-                if(data.students.length === 0) container.innerHTML = "<div>No hay estudiantes conectados</div>";
-                else { let html = ""; data.students.forEach(s => { html += `<div class="estudiante-item">👤 <strong>${s.nombre}</strong> (${s.correo})</div>`; }); container.innerHTML = html; }
-            }
-        } catch(e) {}
-    }
-
-    function iniciarPolling() {
-        if(pollingInterval) clearInterval(pollingInterval);
-        pollingInterval = setInterval(() => { cargarEstudiantesActivos(); cargarMensajesChat(); }, 8000);
-    }
-
-    async function cargarMensajesChat() {
-        try {
-            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "getMessages" }) });
-            const data = await res.json();
-            if(data.success) {
-                const container = document.getElementById('chat-mensajes');
-                if(data.messages.length === 0) container.innerHTML = "<div style='color:gray;'>No hay mensajes aún.</div>";
-                else {
-                    let html = "";
-                    data.messages.slice(-30).forEach(m => { html += `<div class="mensaje"><span class="mensaje-usuario">${m.usuario}:</span> <span class="mensaje-texto">${m.mensaje}</span><br><small>${new Date(m.timestamp).toLocaleTimeString()}</small></div>`; });
-                    container.innerHTML = html;
-                    container.scrollTop = container.scrollHeight;
-                }
-            }
-        } catch(e) {}
-    }
-
-    async function enviarMensajeChat() {
-        const input = document.getElementById('chat-input');
-        const mensaje = input.value.trim();
-        if(!mensaje || !estudianteActual.correo) return;
-        try {
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "sendMessage", nombre: estudianteActual.nombre, correo: estudianteActual.correo, mensaje: mensaje }) });
-            input.value = "";
-            cargarMensajesChat();
-        } catch(e) {}
-    }
-
-    function togglePanelDerecho() {
-        document.getElementById('panelDerecho').classList.toggle('oculto');
-        const chk = document.getElementById('togglePanelCheckbox');
-        if(chk) chk.checked = !document.getElementById('panelDerecho').classList.contains('oculto');
-    }
-
-    function toggleFullscreenVisor() {
-        const visor = document.getElementById('visor-aula');
-        const chk = document.getElementById('fullscreenToggle');
-        if(chk.checked) visor.classList.add('pantalla-completa');
-        else visor.classList.remove('pantalla-completa');
-    }
-
-    function cambiarZoomVisor(valor) {
-        zoomVisorActual = parseFloat(valor);
-        if(ventanasIntercambiadas) {
-            const contenedor = document.getElementById('contenido-flotante');
-            if(contenedor) { const elem = contenedor.querySelector('iframe, img, embed'); if(elem) elem.style.transform = `scale(${zoomVisorActual})`; }
-        } else {
-            const visor = document.getElementById('visor-aula');
-            const elem = visor.querySelector('iframe, img, embed');
-            if(elem) elem.style.transform = `scale(${zoomVisorActual})`;
-        }
-    }
-
-    // ---------- Opciones del Aula ----------
-    function seleccionarOpcionAula(opcion) {
-        currentOpcionAula = opcion;
-        document.querySelectorAll('.opcion-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`.opcion-btn[data-opcion="${opcion}"]`).classList.add('active');
-        if(opcion !== 'clases' && flotante) flotante.style.display = 'none';
-        else if(opcion === 'clases' && flotante) flotante.style.display = 'block';
-        if(opcion === 'clases') iniciarClasesOnline();
-        else if(opcion === 'videos') iniciarReproductorAula();
-        else if(opcion === 'pdfs') mostrarListaPDFs();
-    }
-
-    function iniciarClasesOnline() {
-        if(!flotante) {
-            flotante = document.createElement('div');
-            flotante.className = 'floating-video';
-            flotante.id = 'floating-video';
-            const roomName = document.getElementById('room-id-input').value.replace(/\s+/g, '_');
-            flotante.innerHTML = `<div class="floating-controls"><button onclick="maximizarFlotante()">🗖</button><button onclick="restaurarFlotante()">✖</button></div><iframe id="jitsi-iframe-flotante" src="https://${JITSI_SERVER}/${roomName}#config.startWithAudioMuted=false&config.startWithVideoMuted=false" allow="camera; microphone; fullscreen; display-capture"></iframe>`;
-            document.body.appendChild(flotante);
-            hacerArrastrable(flotante);
-            jitsiIframe = document.getElementById('jitsi-iframe-flotante');
-        } else { flotante.style.display = 'block'; }
-        if(classMedia.length === 0) { document.getElementById('visor-aula').innerHTML = '<div style="text-align:center; color:red;">No hay contenido en la carpeta de clase.</div>'; return; }
-        mediaListAula = classMedia;
-        currentMediaIndex = 0;
-        reproductorPausado = false;
-        document.getElementById('btn-pause-play-clase').innerHTML = "⏸ Pausar";
-        mostrarMediaClase();
-    }
-
-    function hacerArrastrable(el) {
-        let pos1=0,pos2=0,pos3=0,pos4=0;
-        el.onmousedown = dragMouseDown;
-        function dragMouseDown(e) { e=e||window.event; e.preventDefault(); pos3=e.clientX; pos4=e.clientY; document.onmouseup=closeDragElement; document.onmousemove=elementDrag; }
-        function elementDrag(e) { e=e||window.event; e.preventDefault(); pos1=pos3-e.clientX; pos2=pos4-e.clientY; pos3=e.clientX; pos4=e.clientY; el.style.top=(el.offsetTop-pos2)+"px"; el.style.left=(el.offsetLeft-pos1)+"px"; el.style.bottom="auto"; el.style.right="auto"; }
-        function closeDragElement() { document.onmouseup=null; document.onmousemove=null; }
-    }
-
-    function maximizarFlotante() { if(flotante) { flotante.style.width="100%"; flotante.style.height="100%"; flotante.style.top="0"; flotante.style.left="0"; flotante.style.borderRadius="0"; flotante.style.zIndex="2000"; } }
-    function restaurarFlotante() { if(flotante) { flotante.style.width="320px"; flotante.style.height="240px"; flotante.style.bottom="20px"; flotante.style.right="20px"; flotante.style.top="auto"; flotante.style.left="auto"; flotante.style.borderRadius="12px"; flotante.style.zIndex="1000"; } }
-
-    function intercambiarVentanas() {
-        const swapToggle = document.getElementById('swapWindowsToggle');
-        ventanasIntercambiadas = swapToggle.checked;
-        const visor = document.getElementById('visor-aula');
-        if(!flotante) return;
-        if(ventanasIntercambiadas) {
-            const jitsiFrame = flotante.querySelector('iframe');
-            if(jitsiFrame) {
-                const contenidoActualTemp = visor.innerHTML;
-                visor.innerHTML = '';
-                visor.appendChild(jitsiFrame);
-                jitsiFrame.style.width = '100%'; jitsiFrame.style.height = '100%';
-                flotante.innerHTML = `<div class="floating-controls"><button onclick="maximizarFlotante()">🗖</button><button onclick="restaurarFlotante()">✖</button></div><div id="contenido-flotante" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;"></div>`;
-                const contenedorFlotante = document.getElementById('contenido-flotante');
-                contenedorFlotante.innerHTML = contenidoActualTemp;
-                const elem = contenedorFlotante.querySelector('iframe, img, embed');
-                if(elem) elem.style.transform = `scale(${zoomVisorActual})`;
-                jitsiIframe = jitsiFrame;
-            }
-        } else {
-            const jitsiFrame = visor.querySelector('iframe');
-            if(jitsiFrame && jitsiFrame.src.includes(JITSI_SERVER)) {
-                const contenidoFlotante = document.getElementById('contenido-flotante');
-                const contenidoHTML = contenidoFlotante ? contenidoFlotante.innerHTML : '';
-                flotante.innerHTML = `<div class="floating-controls"><button onclick="maximizarFlotante()">🗖</button><button onclick="restaurarFlotante()">✖</button></div><iframe id="jitsi-iframe-flotante" src="${jitsiFrame.src}" allow="camera; microphone; fullscreen; display-capture"></iframe>`;
-                jitsiIframe = document.getElementById('jitsi-iframe-flotante');
-                visor.innerHTML = contenidoHTML;
-                const elem = visor.querySelector('iframe, img, embed');
-                if(elem) elem.style.transform = `scale(${zoomVisorActual})`;
-            }
-        }
-    }
-
-    function recargarJitsi() { if(jitsiIframe) { const src = jitsiIframe.src; jitsiIframe.src = ''; setTimeout(() => { jitsiIframe.src = src; }, 500); } }
-
-    function mostrarMediaClase() {
-        if(reproductorPausado) return;
-        if(!mediaListAula.length) return;
-        const file = mediaListAula[currentMediaIndex];
-        const contenedor = ventanasIntercambiadas ? (document.getElementById('contenido-flotante') || document.getElementById('visor-aula')) : document.getElementById('visor-aula');
-        if(!contenedor) return;
-        contenedor.innerHTML = '';
-        let elemento;
-        if(file.mimeType.includes('video')) {
-            const iframe = document.createElement('iframe');
-            iframe.src = `https://drive.google.com/file/d/${file.id}/preview?autoplay=1`;
-            iframe.allow = "autoplay; fullscreen";
-            iframe.style.width = "100%"; iframe.style.height = "100%";
-            elemento = iframe;
-        } else if(file.mimeType.includes('image')) {
-            const img = document.createElement('img');
-            img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1920`;
-            img.style.width = "100%"; img.style.height = "100%"; img.style.objectFit = "contain";
-            elemento = img;
-        } else if(file.mimeType.includes('audio')) {
-            let imagenPrevia = "";
-            for(let i=currentMediaIndex-1; i>=0; i--) { if(mediaListAula[i].mimeType.includes('image')) { imagenPrevia = `https://drive.google.com/thumbnail?id=${mediaListAula[i].id}&sz=w1920`; break; } }
-            if(!imagenPrevia) imagenPrevia = "https://via.placeholder.com/1920x1080?text=Reproduciendo+audio";
-            const div = document.createElement('div'); div.style.width="100%"; div.style.height="100%"; div.style.position="relative";
-            const imgFondo = document.createElement('img'); imgFondo.src = imagenPrevia; imgFondo.style.width="100%"; imgFondo.style.height="100%"; imgFondo.style.objectFit="cover";
-            div.appendChild(imgFondo);
-            const audioPlayer = document.createElement('audio'); audioPlayer.src = file.audioBase64; audioPlayer.autoplay = true; audioPlayer.controls = true;
-            audioPlayer.style.position = "absolute"; audioPlayer.style.bottom = "20px"; audioPlayer.style.left = "50%"; audioPlayer.style.transform = "translateX(-50%)"; audioPlayer.style.width = "80%"; audioPlayer.style.zIndex = "10";
-            div.appendChild(audioPlayer);
-            elemento = div;
-            audioPlayer.onended = () => { if(!reproductorPausado) { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaClase(); } };
-        } else if(file.mimeType.includes('pdf')) {
-            const embed = document.createElement('embed');
-            embed.src = `https://drive.google.com/viewerng/viewer?embedded=true&url=https://drive.google.com/uc?id=${file.id}`;
-            embed.type = "application/pdf"; embed.style.width="100%"; embed.style.height="100%";
-            elemento = embed;
-        } else return;
-        contenedor.appendChild(elemento);
-        if(elemento.style) elemento.style.transform = `scale(${zoomVisorActual})`;
-        if(mediaTimerAula) clearTimeout(mediaTimerAula);
-        let duracion = TIEMPO_IMAGEN;
-        if(file.mimeType.includes('video')) duracion = file.duracion || TIEMPO_VIDEO_DEFECTO;
-        else if(file.mimeType.includes('audio')) duracion = file.duracion || 30000;
-        else if(file.mimeType.includes('pdf')) duracion = 15000;
-        mediaTimerAula = setTimeout(() => { if(!reproductorPausado) { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaClase(); } }, duracion);
-    }
-
-    function toggleReproduccionClase() {
-        const btn = document.getElementById('btn-pause-play-clase');
-        if(reproductorPausado) { reproductorPausado = false; btn.innerHTML = "⏸ Pausar"; mostrarMediaClase(); }
-        else { reproductorPausado = true; btn.innerHTML = "▶ Reanudar"; if(mediaTimerAula) clearTimeout(mediaTimerAula); const audio = document.querySelector('#visor-aula audio, #contenido-flotante audio'); if(audio) audio.pause(); }
-    }
-    function siguienteMediaClase() { if(reproductorPausado) reproductorPausado = false; if(mediaTimerAula) clearTimeout(mediaTimerAula); currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaClase(); document.getElementById('btn-pause-play-clase').innerHTML = "⏸ Pausar"; }
-    function anteriorMediaClase() { if(reproductorPausado) reproductorPausado = false; if(mediaTimerAula) clearTimeout(mediaTimerAula); currentMediaIndex = (currentMediaIndex-1+mediaListAula.length)%mediaListAula.length; mostrarMediaClase(); document.getElementById('btn-pause-play-clase').innerHTML = "⏸ Pausar"; }
-    function recargarMediaClase() { if(mediaTimerAula) clearTimeout(mediaTimerAula); currentMediaIndex = 0; reproductorPausado = false; mostrarMediaClase(); document.getElementById('btn-pause-play-clase').innerHTML = "⏸ Pausar"; }
-
-    async function subirArchivoClase() {
-        const input = document.createElement('input'); input.type = 'file';
-        input.onchange = async (e) => {
-            const file = e.target.files[0]; if(!file) return;
-            const reader = new FileReader(); reader.readAsDataURL(file);
-            reader.onloadend = async () => {
-                const base64 = reader.result; alert("Subiendo...");
-                try {
-                    const resp = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "uploadClassFile", fileName: file.name, fileData: base64 }) });
-                    const json = await resp.json();
-                    if(json.success) {
-                        alert("Archivo subido. Recargando...");
-                        const res = await fetch(SCRIPT_URL); const data = await res.json();
-                        classMedia = data.classMedia || []; pdfFiles = classMedia.filter(f => f.mimeType.includes('pdf'));
-                        if(currentOpcionAula === 'clases') { mediaListAula = classMedia; recargarMediaClase(); }
-                        else if(currentOpcionAula === 'videos') iniciarReproductorAula();
-                        else if(currentOpcionAula === 'pdfs') mostrarListaPDFs();
-                    } else alert("Error.");
-                } catch(err) { alert("Error de red."); }
-            };
-        }; input.click();
-    }
-
-    // ==================== FUNCIONES AUXILIARES DEL AULA (originales) ====================
-    function iniciarReproductorAula() {
-        const multimedia = classMedia.filter(f => f.mimeType.includes('video') || f.mimeType.includes('image'));
-        if(multimedia.length === 0) { document.getElementById('visor-aula').innerHTML = '<div style="text-align:center; color:red;">No hay videos o imágenes.</div>'; return; }
-        mediaListAula = multimedia; currentMediaIndex = 0;
-        mostrarMediaAula();
-    }
-    function mostrarMediaAula() {
-        if(!mediaListAula.length) return;
-        const file = mediaListAula[currentMediaIndex];
-        const visor = document.getElementById('visor-aula'); visor.innerHTML = '';
-        if(file.mimeType.includes('video')) {
-            const iframe = document.createElement('iframe'); iframe.src = `https://drive.google.com/file/d/${file.id}/preview?autoplay=1`; iframe.allow = "autoplay; fullscreen"; iframe.style.width="100%"; iframe.style.height="100%";
-            visor.appendChild(iframe);
-            if(mediaTimerAula) clearTimeout(mediaTimerAula);
-            mediaTimerAula = setTimeout(() => { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaAula(); }, file.duracion||TIEMPO_VIDEO_DEFECTO);
-        } else if(file.mimeType.includes('image')) {
-            const img = document.createElement('img'); img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1920`; img.style.width="100%"; img.style.height="100%"; img.style.objectFit="contain";
-            visor.appendChild(img);
-            if(mediaTimerAula) clearTimeout(mediaTimerAula);
-            mediaTimerAula = setTimeout(() => { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaAula(); }, TIEMPO_IMAGEN);
-        }
-    }
-    function mostrarListaPDFs() {
-        const visor = document.getElementById('visor-aula');
-        if(pdfFiles.length === 0) { visor.innerHTML = '<div style="text-align:center; color:red;">No se encontraron PDFs.</div>'; return; }
-        let html = `<div class="pdf-list">`;
-        pdfFiles.forEach(pdf => { html += `<div class="pdf-item" onclick="verPDF('${pdf.id}')">📄 ${pdf.name}</div>`; });
-        html += `</div><div id="pdf-viewer" style="width:100%; height:400px; margin-top:15px;"></div>`;
-        visor.innerHTML = html;
-    }
-    function verPDF(id) { const viewer = document.getElementById('pdf-viewer'); if(viewer) viewer.innerHTML = `<embed src="https://drive.google.com/viewerng/viewer?embedded=true&url=https://drive.google.com/uc?id=${id}" width="100%" height="400" type="application/pdf">`; }
-
-    window.onload = () => { precargarLista(); };
+// ==================== CONFIGURACIÓN GLOBAL ====================
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyiNm-r8Ue9SISKpvJfGqW5E9OV4b7sr_y8DvXp7gZm4BC32Zb9hrktAhIvfmMVFwQ/exec"; // ⚠️ REEMPLAZAR CON TU URL
+// Cambiamos a meet.jit.si porque meet.ffmuc.net bloquea la incrustación en iframes externos (X-Frame-Options / CSP)
+const JITSI_SERVER = "meet.jit.si"; 
+const TIEMPO_IMAGEN = 5000;
+const TIEMPO_VIDEO_DEFECTO = 30000;
+const TIEMPO_AUDIO_RESPALDO = 15000;
+let archivos = [];
+let classMedia = [];
+let configComercial = {};
+let indexActual = 0;
+let reproductorTimer = null;
+let clockTimer = null;
+let tiempoTranscurridoSimulado = 0;
+let tiempoTotalSimulado = 0;
+let sistemaIniciado = false;
+let esPausado = false;
+let scaleActual = 1.20;
+let mediaRecorder = null;
+let recordedChunks = [];
+let typeRecording = "";
+let blobGrabado = null;
+const audioHardware = document.getElementById('global-audio');
+// Variables Aula Virtual (nuevas)
+let estudianteActual = { nombre: "", correo: "" };
+let currentOpcionAula = "clases";
+let pdfFiles = [];
+let mediaTimerAula = null;
+let currentMediaIndex = 0;
+let mediaListAula = [];
+let flotante = null;
+let reproductorPausado = false;
+let zoomVisorActual = 1.0;
+let ventanasIntercambiadas = false;
+let jitsiIframe = null;
+let pollingInterval = null;
+// Reloj Venezuela
+setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('es-VE'); }, 1000);
+function formatTime(seconds) { if (isNaN(seconds) || seconds < 0) return "00:00"; let m = Math.floor(seconds/60).toString().padStart(2,'0'); let s = Math.floor(seconds%60).toString().padStart(2,'0'); return `${m}:${s}`; }
+// ==================== FUNCIONES CARTELERA (originales) ====================
+async function precargarLista() {
+try {
+const res = await fetch(SCRIPT_URL);
+const data = await res.json();
+archivos = data.archivos;
+classMedia = data.classMedia || [];
+configComercial = data.config;
+document.getElementById('header-app-title').innerText = configComercial.nombre;
+document.getElementById('brand-title').innerText = configComercial.nombre.toUpperCase();
+document.getElementById('adm-nombre').value = configComercial.nombre;
+document.getElementById('adm-telefono').value = configComercial.telefono;
+document.getElementById('adm-instagram').value = configComercial.instagram;
+document.getElementById('adm-facebook').value = configComercial.facebook;
+const linksContainer = document.getElementById('admin-links-rows');
+linksContainer.innerHTML = "";
+if(configComercial.adLinks && configComercial.adLinks.length) configComercial.adLinks.forEach(item => addAdLinkRow(item.title, item.url));
+document.getElementById('msg-espera').innerText = "Medios listos. Presione botón amarillo.";
+pdfFiles = classMedia.filter(f => f.mimeType.includes('pdf'));
+} catch(e) { setTimeout(precargarLista, 3000); }
+}
+function switchModule(moduleName, element) {
+document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+element.classList.add('active');
+document.querySelectorAll('.app-module').forEach(el => el.classList.remove('active'));
+const ctrlCartelera = document.getElementById('cartelera-controls');
+if(moduleName === 'cartelera') {
+ctrlCartelera.style.display = 'flex';
+document.getElementById('mod-cartelera').classList.add('active');
+document.getElementById('header-app-title').innerText = configComercial.nombre || "CARTELERA DIGITAL";
+if(sistemaIniciado && esPausado) toggleParar();
+} else {
+ctrlCartelera.style.display = 'none';
+if(sistemaIniciado && !esPausado) toggleParar();
+if(moduleName === 'grabador') { document.getElementById('mod-grabador').classList.add('active'); document.getElementById('header-app-title').innerText = "ESTUDIO DE GRABACIÓN"; initWebcam(); }
+else if(moduleName === 'aula') { document.getElementById('mod-aula').classList.add('active'); document.getElementById('header-app-title').innerText = "AULA VIRTUAL ACTIVA"; }
+else if(moduleName === 'publicidad') { document.getElementById('mod-publicidad').classList.add('active'); document.getElementById('header-app-title').innerText = "VITRINA COMERCIAL"; renderPublicidadGrid(); }
+else if(moduleName === 'admin') { document.getElementById('mod-admin').classList.add('active'); document.getElementById('header-app-title').innerText = "CONFIGURACIÓN"; }
+}
+}
+function iniciarSistema() { if(archivos.length===0) return; sistemaIniciado=true; esPausado=false; audioHardware.play().catch(()=>{}); audioHardware.pause(); document.getElementById('overlay-inicio').style.display='none'; mostrarMedia(0); }
+function apagarControles() { clearTimeout(reproductorTimer); clearInterval(clockTimer); audioHardware.pause(); audioHardware.src=""; audioHardware.onended=null; audioHardware.ontimeupdate=null; document.getElementById('media-timer').innerText="00:00"; }
+function cambiarZoom(valor) { scaleActual=parseFloat(valor); ajustarEscalaVisual(); }
+function ajustarEscalaVisual() { document.querySelectorAll('#media-content img, #media-content iframe').forEach(el => el.style.transform=`scale(${scaleActual})`); }
+function mostrarMedia(i) { if(!sistemaIniciado || esPausado) return; const container = document.getElementById('media-content'); const file = archivos[i]; document.getElementById('counter').innerText=`${i+1}/${archivos.length}`; apagarControles(); container.innerHTML=""; if(file.mimeType.includes('video')){ const ifr=document.createElement('iframe'); ifr.src=`https://drive.google.com/file/d/${file.id}/preview?autoplay=1`; ifr.allow="autoplay; fullscreen"; container.appendChild(ifr); let tiempoEspera=file.duracion||TIEMPO_VIDEO_DEFECTO; tiempoTranscurridoSimulado=0; tiempoTotalSimulado=Math.floor(tiempoEspera/1000); document.getElementById('media-timer').innerText=`00:00 / ${formatTime(tiempoTotalSimulado)}`; clockTimer=setInterval(()=>{ if(!esPausado){ tiempoTranscurridoSimulado++; if(tiempoTranscurridoSimulado<=tiempoTotalSimulado) document.getElementById('media-timer').innerText=`${formatTime(tiempoTranscurridoSimulado)} / ${formatTime(tiempoTotalSimulado)}`; } },1000); reproductorTimer=setTimeout(siguienteMedia,tiempoEspera); } else if(file.mimeType.includes('audio')){ let imagenPreviaUrl=""; for(let k=i-1;k>=0;k--) if(!archivos[k].mimeType.includes('video') && !archivos[k].mimeType.includes('audio')){ imagenPreviaUrl=`https://drive.google.com/thumbnail?id=${archivos[k].id}&sz=w1920`; break; } if(!imagenPreviaUrl) for(let k=archivos.length-1;k>=0;k--) if(!archivos[k].mimeType.includes('video') && !archivos[k].mimeType.includes('audio')){ imagenPreviaUrl=`https://drive.google.com/thumbnail?id=${archivos[k].id}&sz=w1920`; break; } if(imagenPreviaUrl){ const imgFondo=document.createElement('img'); imgFondo.src=imagenPreviaUrl; container.appendChild(imgFondo); const audioBanner=document.createElement('div'); audioBanner.style.position='absolute'; audioBanner.style.bottom='30px'; audioBanner.style.left='50%'; audioBanner.style.transform='translateX(-50%)'; audioBanner.style.background='rgba(0,18,32,0.85)'; audioBanner.style.border='2px solid #D4AF37'; audioBanner.style.borderRadius='12px'; audioBanner.style.padding='12px 25px'; audioBanner.style.display='flex'; audioBanner.style.alignItems='center'; audioBanner.style.gap='25px'; audioBanner.style.zIndex='10'; audioBanner.innerHTML=`<div><div style="font-size:1.1rem; color:#D4AF37;">🔊 VOICE OVER</div><div style="font-size:0.85rem;">${file.name}</div></div><div style="display:flex; gap:5px;"><div class="barrita"></div><div class="barrita"></div><div class="barrita"></div><div class="barrita"></div></div>`; container.appendChild(audioBanner); } if(file.audioBase64){ audioHardware.src=file.audioBase64; audioHardware.play().catch(()=>{ reproductorTimer=setTimeout(siguienteMedia,TIEMPO_AUDIO_RESPALDO); }); audioHardware.ontimeupdate=function(){ document.getElementById('media-timer').innerText=`${formatTime(audioHardware.currentTime)} / ${formatTime(audioHardware.duration)}`; }; audioHardware.onended=function(){ siguienteMedia(); }; } else { reproductorTimer=setTimeout(siguienteMedia,5000); } } else { const img=document.createElement('img'); img.src=`https://drive.google.com/thumbnail?id=${file.id}&sz=w1920`; container.appendChild(img); tiempoTranscurridoSimulado=0; tiempoTotalSimulado=Math.floor(TIEMPO_IMAGEN/1000); document.getElementById('media-timer').innerText=`00:00 / ${formatTime(tiempoTotalSimulado)}`; clockTimer=setInterval(()=>{ if(!esPausado){ tiempoTranscurridoSimulado++; if(tiempoTranscurridoSimulado<=tiempoTotalSimulado) document.getElementById('media-timer').innerText=`${formatTime(tiempoTranscurridoSimulado)} / ${formatTime(tiempoTotalSimulado)}`; } },1000); reproductorTimer=setTimeout(siguienteMedia,TIEMPO_IMAGEN); } ajustarEscalaVisual(); }
+function siguienteMedia(){ if(esPausado) return; indexActual++; if(indexActual>=archivos.length){ indexActual=0; mostrarMedia(indexActual); refrescarListaEnSegundoPlano(); return; } mostrarMedia(indexActual); }
+function toggleParar(){ const btn=document.getElementById('btn-parar'); if(!esPausado){ esPausado=true; btn.innerText="Reanudar ▶"; btn.style.background="#D4AF37"; btn.style.color="#000"; clearTimeout(reproductorTimer); audioHardware.pause(); } else { esPausado=false; btn.innerText="Parar █"; btn.style.background="#001220"; btn.style.color="#D4AF37"; if(archivos[indexActual].mimeType.includes('audio') && audioHardware.src) audioHardware.play().catch(()=>{}); else { let tiempoRestante=(tiempoTotalSimulado-tiempoTranscurridoSimulado)*1000; if(tiempoRestante<=0) tiempoRestante=1000; reproductorTimer=setTimeout(siguienteMedia,tiempoRestante); } } }
+function adelanteMediaManual(){ esPausado=false; apagarControles(); siguienteMedia(); }
+function regresarMedia(){ esPausado=false; apagarControles(); indexActual--; if(indexActual<0) indexActual=archivos.length-1; mostrarMedia(indexActual); }
+async function refrescarListaEnSegundoPlano(){ try{ const res=await fetch(SCRIPT_URL); const d=await res.json(); if(d.archivos && d.archivos.length) archivos=d.archivos; } catch(e){} }
+// ==================== FUNCIONES GRABADOR (originales) ====================
+async function initWebcam(){ try{ const stream=await navigator.mediaDevices.getUserMedia({audio:true, video:true}); document.getElementById('webcam-preview').srcObject=stream; } catch(err){ alert("Permisos de cámara y micrófono necesarios."); } }
+function startRecording(type){ typeRecording=type; recordedChunks=[]; const stream=document.getElementById('webcam-preview').srcObject; if(!stream) return; let options={ mimeType: type==='audio'?'audio/webm':'video/webm;codecs=vp8' }; mediaRecorder=new MediaRecorder(stream,options); mediaRecorder.ondataavailable=(e)=>{ if(e.data.size>0) recordedChunks.push(e.data); }; mediaRecorder.onstop=processStopRecording; mediaRecorder.start(); document.getElementById('rec-status').style.display='block'; document.getElementById('btn-stop-rec').disabled=false; document.getElementById('btn-start-audio').disabled=true; document.getElementById('btn-start-video').disabled=true; }
+function stopRecording(){ if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop(); document.getElementById('rec-status').style.display='none'; document.getElementById('btn-stop-rec').disabled=true; document.getElementById('btn-start-audio').disabled=false; document.getElementById('btn-start-video').disabled=false; }
+function processStopRecording(){ blobGrabado=new Blob(recordedChunks,{type:typeRecording==='audio'?'audio/mp3':'video/mp4'}); const url=URL.createObjectURL(blobGrabado); document.getElementById('recording-preview-box').style.display='block'; const audioPlayback=document.getElementById('audio-playback'); const videoPlayback=document.getElementById('video-playback'); if(typeRecording==='audio'){ videoPlayback.style.display='none'; audioPlayback.style.display='block'; audioPlayback.src=url; } else { audioPlayback.style.display='none'; videoPlayback.style.display='block'; videoPlayback.src=url; } }
+function uploadCapturedFile(){ if(!blobGrabado) return; const reader=new FileReader(); reader.readAsDataURL(blobGrabado); reader.onloadend=async function(){ const base64Data=reader.result; const extension=typeRecording==='audio'?'mp3':'mp4'; const nameFile=`Grabacion_${Date.now()}.${extension}`; alert("Subiendo..."); try{ const response=await fetch(SCRIPT_URL,{ method:'POST', body:JSON.stringify({ action:"uploadFile", fileName:nameFile, fileData:base64Data }) }); const resJson=await response.json(); if(resJson.success){ alert(`Archivo guardado en Drive.`); document.getElementById('recording-preview-box').style.display='none'; refrescarListaEnSegundoPlano(); } else alert("Error."); } catch(err){ alert("Error de red."); } }; }
+// ==================== FUNCIONES PUBLICIDAD (originales) ====================
+function renderPublicidadGrid(){ const container=document.getElementById('publicidad-grid-container'); container.innerHTML=""; if(!configComercial.adLinks || configComercial.adLinks.length===0){ container.innerHTML="<p>No hay enlaces.</p>"; return; } configComercial.adLinks.forEach(ad=>{ const card=document.createElement('div'); card.className="ad-card"; card.innerHTML=`<div><h4>${ad.title}</h4><p>${ad.url}</p></div><button class="btn-control" onclick="openAdViewer('${ad.url}')">Ver</button>`; container.appendChild(card); }); }
+function openAdViewer(url){ document.getElementById('ad-viewer-wrapper').style.display="block"; document.getElementById('ad-iframe-browser').src=url; }
+function closeAdViewer(){ document.getElementById('ad-viewer-wrapper').style.display="none"; document.getElementById('ad-iframe-browser').src=""; }
+// ==================== FUNCIONES ADMIN (originales) ====================
+function addAdLinkRow(title="",url=""){ const container=document.getElementById('admin-links-rows'); const row=document.createElement('div'); row.style.display="flex"; row.style.gap="10px"; row.innerHTML=`<input type="text" placeholder="Título" class="form-control row-title" value="${title}"><input type="url" placeholder="URL" class="form-control row-url" value="${url}"><button type="button" class="btn-control btn-danger" onclick="this.parentElement.remove()">✖</button>`; container.appendChild(row); }
+async function saveAdminConfig(event){ event.preventDefault(); const nombre=document.getElementById('adm-nombre').value; const telefono=document.getElementById('adm-telefono').value; const instagram=document.getElementById('adm-instagram').value; const facebook=document.getElementById('adm-facebook').value; const adLinks=[]; document.querySelectorAll('.ad-link-row').forEach(row=>{ adLinks.push({ title:row.querySelector('.row-title').value, url:row.querySelector('.row-url').value }); }); alert("Guardando configuración..."); try{ const response=await fetch(SCRIPT_URL,{ method:'POST', body:JSON.stringify({ action:"saveConfig", nombre, telefono, instagram, facebook, adLinks }) }); const resJson=await response.json(); if(resJson.success){ alert("Configuración guardada."); location.reload(); } else alert("Error."); } catch(e){ alert("Error de red."); } }
+// ==================== FUNCIONES AULA VIRTUAL (mejoradas) ====================
+async function conectarAulaVirtual() {
+const correo = document.getElementById('student-id-input').value.trim();
+if(!correo) { alert("Ingresa tu correo registrado."); return; }
+const containerAuth = document.getElementById('aula-autenticado');
+const containerNoAuth = document.getElementById('aula-no-autenticado');
+containerAuth.style.display = "none";
+containerNoAuth.style.display = "block";
+try {
+const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "validarEstudiante", email: correo }) });
+const data = await response.json();
+if(data.success && data.autorizado) {
+estudianteActual = { nombre: data.nombre, correo: data.correo };
+containerAuth.style.display = "flex";
+containerNoAuth.style.display = "none";
+await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "joinClass", correo: estudianteActual.correo, nombre: estudianteActual.nombre }) });
+// ⚠️ CAMBIA AQUÍ TU CORREO DE ANFITRIÓN (opcional)
+const esAnfitrion = (estudianteActual.correo === "tutor@example.com");
+if(esAnfitrion) { /* controles ya visibles */ }
+cargarEstudiantesActivos();
+cargarMensajesChat();
+iniciarPolling();
+seleccionarOpcionAula('clases');
+} else { alert("Correo no autorizado."); }
+} catch(e) { alert("Error de conexión."); }
+}
+function salirDelAula() {
+document.getElementById('aula-autenticado').style.display = "none";
+document.getElementById('aula-no-autenticado').style.display = "block";
+if(pollingInterval) clearInterval(pollingInterval);
+if(flotante) flotante.remove();
+flotante = null;
+document.getElementById('visor-aula').innerHTML = '<div style="text-align:center; color:#8fa0b0;">Selecciona una opción para comenzar</div>';
+currentOpcionAula = "clases";
+reproductorPausado = false;
+if(mediaTimerAula) clearTimeout(mediaTimerAula);
+document.getElementById('swapWindowsToggle').checked = false;
+ventanasIntercambiadas = false;
+}
+async function cargarEstudiantesActivos() {
+try {
+const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "getActiveStudents" }) });
+const data = await res.json();
+if(data.success) {
+const container = document.getElementById('conectados-lista');
+if(data.students.length === 0) container.innerHTML = "<div>No hay estudiantes conectados</div>";
+else { let html = ""; data.students.forEach(s => { html += `<div class="estudiante-item">👤 <strong>${s.nombre}</strong> (${s.correo})</div>`; }); container.innerHTML = html; }
+}
+} catch(e) {}
+}
+function iniciarPolling() {
+if(pollingInterval) clearInterval(pollingInterval);
+pollingInterval = setInterval(() => { cargarEstudiantesActivos(); cargarMensajesChat(); }, 8000);
+}
+async function cargarMensajesChat() {
+try {
+const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "getMessages" }) });
+const data = await res.json();
+if(data.success) {
+const container = document.getElementById('chat-mensajes');
+if(data.messages.length === 0) container.innerHTML = "<div style='color:gray;'>No hay mensajes aún.</div>";
+else {
+let html = "";
+data.messages.slice(-30).forEach(m => { html += `<div class="mensaje"><span class="mensaje-usuario">${m.usuario}:</span> <span class="mensaje-texto">${m.mensaje}</span><br><small>${new Date(m.timestamp).toLocaleTimeString()}</small></div>`; });
+container.innerHTML = html;
+container.scrollTop = container.scrollHeight;
+}
+}
+} catch(e) {}
+}
+async function enviarMensajeChat() {
+const input = document.getElementById('chat-input');
+const mensaje = input.value.trim();
+if(!mensaje || !estudianteActual.correo) return;
+try {
+await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "sendMessage", nombre: estudianteActual.nombre, correo: estudianteActual.correo, mensaje: mensaje }) });
+input.value = "";
+cargarMensajesChat();
+} catch(e) {}
+}
+function togglePanelDerecho() {
+document.getElementById('panelDerecho').classList.toggle('oculto');
+const chk = document.getElementById('togglePanelCheckbox');
+if(chk) chk.checked = !document.getElementById('panelDerecho').classList.contains('oculto');
+}
+function toggleFullscreenVisor() {
+const visor = document.getElementById('visor-aula');
+const chk = document.getElementById('fullscreenToggle');
+if(chk.checked) visor.classList.add('pantalla-completa');
+else visor.classList.remove('pantalla-completa');
+}
+function cambiarZoomVisor(valor) {
+zoomVisorActual = parseFloat(valor);
+if(ventanasIntercambiadas) {
+const contenedor = document.getElementById('contenido-flotante');
+if(contenedor) { const elem = contenedor.querySelector('iframe, img, embed'); if(elem) elem.style.transform = `scale(${zoomVisorActual})`; }
+} else {
+const visor = document.getElementById('visor-aula');
+const elem = visor.querySelector('iframe, img, embed');
+if(elem) elem.style.transform = `scale(${zoomVisorActual})`;
+}
+}
+// ---------- Opciones del Aula ----------
+function seleccionarOpcionAula(opcion) {
+currentOpcionAula = opcion;
+document.querySelectorAll('.opcion-btn').forEach(btn => btn.classList.remove('active'));
+document.querySelector(`.opcion-btn[data-opcion="${opcion}"]`).classList.add('active');
+if(opcion !== 'clases' && flotante) flotante.style.display = 'none';
+else if(opcion === 'clases' && flotante) flotante.style.display = 'block';
+if(opcion === 'clases') iniciarClasesOnline();
+else if(opcion === 'videos') iniciarReproductorAula();
+else if(opcion === 'pdfs') mostrarListaPDFs();
+}
+function iniciarClasesOnline() {
+if(!flotante) {
+flotante = document.createElement('div');
+flotante.className = 'floating-video';
+flotante.id = 'floating-video';
+// Limpiamos el nombre de la sala para evitar caracteres no soportados por Jitsi
+const roomName = document.getElementById('room-id-input').value.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+// Se agrega allowfullscreen y permisos extendidos, además de desactivar la pantalla de pre-union para evitar bloqueos en iframe
+flotante.innerHTML = `<div class="floating-controls"><button onclick="maximizarFlotante()">🗖</button><button onclick="restaurarFlotante()">✖</button></div><iframe id="jitsi-iframe-flotante" src="https://${JITSI_SERVER}/${roomName}#config.startWithAudioMuted=false&config.startWithVideoMuted=false&config.prejoinPageDisabled=true" allow="camera *; microphone *; fullscreen *; display-capture *; autoplay *; clipboard-write *" allowfullscreen></iframe>`;
+document.body.appendChild(flotante);
+hacerArrastrable(flotante);
+jitsiIframe = document.getElementById('jitsi-iframe-flotante');
+} else { flotante.style.display = 'block'; }
+if(classMedia.length === 0) { document.getElementById('visor-aula').innerHTML = '<div style="text-align:center; color:red;">No hay contenido en la carpeta de clase.</div>'; return; }
+mediaListAula = classMedia;
+currentMediaIndex = 0;
+reproductorPausado = false;
+document.getElementById('btn-pause-play-clase').innerHTML = "⏸ Pausar";
+mostrarMediaClase();
+}
+function hacerArrastrable(el) {
+let pos1=0,pos2=0,pos3=0,pos4=0;
+el.onmousedown = dragMouseDown;
+function dragMouseDown(e) { e=e||window.event; e.preventDefault(); pos3=e.clientX; pos4=e.clientY; document.onmouseup=closeDragElement; document.onmousemove=elementDrag; }
+function elementDrag(e) { e=e||window.event; e.preventDefault(); pos1=pos3-e.clientX; pos2=pos4-e.clientY; pos3=e.clientX; pos4=e.clientY; el.style.top=(el.offsetTop-pos2)+"px"; el.style.left=(el.offsetLeft-pos1)+"px"; el.style.bottom="auto"; el.style.right="auto"; }
+function closeDragElement() { document.onmouseup=null; document.onmousemove=null; }
+}
+function maximizarFlotante() { if(flotante) { flotante.style.width="100%"; flotante.style.height="100%"; flotante.style.top="0"; flotante.style.left="0"; flotante.style.borderRadius="0"; flotante.style.zIndex="2000"; } }
+function restaurarFlotante() { if(flotante) { flotante.style.width="320px"; flotante.style.height="240px"; flotante.style.bottom="20px"; flotante.style.right="20px"; flotante.style.top="auto"; flotante.style.left="auto"; flotante.style.borderRadius="12px"; flotante.style.zIndex="1000"; } }
+function intercambiarVentanas() {
+const swapToggle = document.getElementById('swapWindowsToggle');
+ventanasIntercambiadas = swapToggle.checked;
+const visor = document.getElementById('visor-aula');
+if(!flotante) return;
+if(ventanasIntercambiadas) {
+const jitsiFrame = flotante.querySelector('iframe');
+if(jitsiFrame) {
+const contenidoActualTemp = visor.innerHTML;
+visor.innerHTML = '';
+visor.appendChild(jitsiFrame);
+jitsiFrame.style.width = '100%'; jitsiFrame.style.height = '100%';
+flotante.innerHTML = `<div class="floating-controls"><button onclick="maximizarFlotante()">🗖</button><button onclick="restaurarFlotante()">✖</button></div><div id="contenido-flotante" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;"></div>`;
+const contenedorFlotante = document.getElementById('contenido-flotante');
+contenedorFlotante.innerHTML = contenidoActualTemp;
+const elem = contenedorFlotante.querySelector('iframe, img, embed');
+if(elem) elem.style.transform = `scale(${zoomVisorActual})`;
+jitsiIframe = jitsiFrame;
+}
+} else {
+const jitsiFrame = visor.querySelector('iframe');
+if(jitsiFrame && jitsiFrame.src.includes(JITSI_SERVER)) {
+const contenidoFlotante = document.getElementById('contenido-flotante');
+const contenidoHTML = contenidoFlotante ? contenidoFlotante.innerHTML : '';
+// Restablecemos los permisos correctos al intercambiar de vuelta
+flotante.innerHTML = `<div class="floating-controls"><button onclick="maximizarFlotante()">🗖</button><button onclick="restaurarFlotante()">✖</button></div><iframe id="jitsi-iframe-flotante" src="${jitsiFrame.src}" allow="camera *; microphone *; fullscreen *; display-capture *; autoplay *; clipboard-write *" allowfullscreen></iframe>`;
+jitsiIframe = document.getElementById('jitsi-iframe-flotante');
+visor.innerHTML = contenidoHTML;
+const elem = visor.querySelector('iframe, img, embed');
+if(elem) elem.style.transform = `scale(${zoomVisorActual})`;
+}
+}
+}
+function recargarJitsi() { if(jitsiIframe) { const src = jitsiIframe.src; jitsiIframe.src = ''; setTimeout(() => { jitsiIframe.src = src; }, 500); } }
+function mostrarMediaClase() {
+if(reproductorPausado) return;
+if(!mediaListAula.length) return;
+const file = mediaListAula[currentMediaIndex];
+const contenedor = ventanasIntercambiadas ? (document.getElementById('contenido-flotante') || document.getElementById('visor-aula')) : document.getElementById('visor-aula');
+if(!contenedor) return;
+contenedor.innerHTML = '';
+let elemento;
+if(file.mimeType.includes('video')) {
+const iframe = document.createElement('iframe');
+iframe.src = `https://drive.google.com/file/d/${file.id}/preview?autoplay=1`;
+iframe.allow = "autoplay; fullscreen";
+iframe.style.width = "100%"; iframe.style.height = "100%";
+elemento = iframe;
+} else if(file.mimeType.includes('image')) {
+const img = document.createElement('img');
+img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1920`;
+img.style.width = "100%"; img.style.height = "100%"; img.style.objectFit = "contain";
+elemento = img;
+} else if(file.mimeType.includes('audio')) {
+let imagenPrevia = "";
+for(let i=currentMediaIndex-1; i>=0; i--) { if(mediaListAula[i].mimeType.includes('image')) { imagenPrevia = `https://drive.google.com/thumbnail?id=${mediaListAula[i].id}&sz=w1920`; break; } }
+if(!imagenPrevia) imagenPrevia = "https://via.placeholder.com/1920x1080?text=Reproduciendo+audio";
+const div = document.createElement('div'); div.style.width="100%"; div.style.height="100%"; div.style.position="relative";
+const imgFondo = document.createElement('img'); imgFondo.src = imagenPrevia; imgFondo.style.width="100%"; imgFondo.style.height="100%"; imgFondo.style.objectFit="cover";
+div.appendChild(imgFondo);
+const audioPlayer = document.createElement('audio'); audioPlayer.src = file.audioBase64; audioPlayer.autoplay = true; audioPlayer.controls = true;
+audioPlayer.style.position = "absolute"; audioPlayer.style.bottom = "20px"; audioPlayer.style.left = "50%"; audioPlayer.style.transform = "translateX(-50%)"; audioPlayer.style.width = "80%"; audioPlayer.style.zIndex = "10";
+div.appendChild(audioPlayer);
+elemento = div;
+audioPlayer.onended = () => { if(!reproductorPausado) { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaClase(); } };
+} else if(file.mimeType.includes('pdf')) {
+const embed = document.createElement('embed');
+embed.src = `https://drive.google.com/viewerng/viewer?embedded=true&url=https://drive.google.com/uc?id=${file.id}`;
+embed.type = "application/pdf"; embed.style.width="100%"; embed.style.height="100%";
+elemento = embed;
+} else return;
+contenedor.appendChild(elemento);
+if(elemento.style) elemento.style.transform = `scale(${zoomVisorActual})`;
+if(mediaTimerAula) clearTimeout(mediaTimerAula);
+let duracion = TIEMPO_IMAGEN;
+if(file.mimeType.includes('video')) duracion = file.duracion || TIEMPO_VIDEO_DEFECTO;
+else if(file.mimeType.includes('audio')) duracion = file.duracion || 30000;
+else if(file.mimeType.includes('pdf')) duracion = 15000;
+mediaTimerAula = setTimeout(() => { if(!reproductorPausado) { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaClase(); } }, duracion);
+}
+function toggleReproduccionClase() {
+const btn = document.getElementById('btn-pause-play-clase');
+if(reproductorPausado) { reproductorPausado = false; btn.innerHTML = "⏸ Pausar"; mostrarMediaClase(); }
+else { reproductorPausado = true; btn.innerHTML = "▶ Reanudar"; if(mediaTimerAula) clearTimeout(mediaTimerAula); const audio = document.querySelector('#visor-aula audio, #contenido-flotante audio'); if(audio) audio.pause(); }
+}
+function siguienteMediaClase() { if(reproductorPausado) reproductorPausado = false; if(mediaTimerAula) clearTimeout(mediaTimerAula); currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaClase(); document.getElementById('btn-pause-play-clase').innerHTML = "⏸ Pausar"; }
+function anteriorMediaClase() { if(reproductorPausado) reproductorPausado = false; if(mediaTimerAula) clearTimeout(mediaTimerAula); currentMediaIndex = (currentMediaIndex-1+mediaListAula.length)%mediaListAula.length; mostrarMediaClase(); document.getElementById('btn-pause-play-clase').innerHTML = "⏸ Pausar"; }
+function recargarMediaClase() { if(mediaTimerAula) clearTimeout(mediaTimerAula); currentMediaIndex = 0; reproductorPausado = false; mostrarMediaClase(); document.getElementById('btn-pause-play-clase').innerHTML = "⏸ Pausar"; }
+async function subirArchivoClase() {
+const input = document.createElement('input'); input.type = 'file';
+input.onchange = async (e) => {
+const file = e.target.files[0]; if(!file) return;
+const reader = new FileReader(); reader.readAsDataURL(file);
+reader.onloadend = async () => {
+const base64 = reader.result; alert("Subiendo...");
+try {
+const resp = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "uploadClassFile", fileName: file.name, fileData: base64 }) });
+const json = await resp.json();
+if(json.success) {
+alert("Archivo subido. Recargando...");
+const res = await fetch(SCRIPT_URL); const data = await res.json();
+classMedia = data.classMedia || []; pdfFiles = classMedia.filter(f => f.mimeType.includes('pdf'));
+if(currentOpcionAula === 'clases') { mediaListAula = classMedia; recargarMediaClase(); }
+else if(currentOpcionAula === 'videos') iniciarReproductorAula();
+else if(currentOpcionAula === 'pdfs') mostrarListaPDFs();
+} else alert("Error.");
+} catch(err) { alert("Error de red."); }
+};
+}; input.click();
+}
+// ==================== FUNCIONES AUXILIARES DEL AULA (originales) ====================
+function iniciarReproductorAula() {
+const multimedia = classMedia.filter(f => f.mimeType.includes('video') || f.mimeType.includes('image'));
+if(multimedia.length === 0) { document.getElementById('visor-aula').innerHTML = '<div style="text-align:center; color:red;">No hay videos o imágenes.</div>'; return; }
+mediaListAula = multimedia; currentMediaIndex = 0;
+mostrarMediaAula();
+}
+function mostrarMediaAula() {
+if(!mediaListAula.length) return;
+const file = mediaListAula[currentMediaIndex];
+const visor = document.getElementById('visor-aula'); visor.innerHTML = '';
+if(file.mimeType.includes('video')) {
+const iframe = document.createElement('iframe'); iframe.src = `https://drive.google.com/file/d/${file.id}/preview?autoplay=1`; iframe.allow = "autoplay; fullscreen"; iframe.style.width="100%"; iframe.style.height="100%";
+visor.appendChild(iframe);
+if(mediaTimerAula) clearTimeout(mediaTimerAula);
+mediaTimerAula = setTimeout(() => { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaAula(); }, file.duracion||TIEMPO_VIDEO_DEFECTO);
+} else if(file.mimeType.includes('image')) {
+const img = document.createElement('img'); img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1920`; img.style.width="100%"; img.style.height="100%"; img.style.objectFit="contain";
+visor.appendChild(img);
+if(mediaTimerAula) clearTimeout(mediaTimerAula);
+mediaTimerAula = setTimeout(() => { currentMediaIndex = (currentMediaIndex+1)%mediaListAula.length; mostrarMediaAula(); }, TIEMPO_IMAGEN);
+}
+}
+function mostrarListaPDFs() {
+const visor = document.getElementById('visor-aula');
+if(pdfFiles.length === 0) { visor.innerHTML = '<div style="text-align:center; color:red;">No se encontraron PDFs.</div>'; return; }
+let html = `<div class="pdf-list">`;
+pdfFiles.forEach(pdf => { html += `<div class="pdf-item" onclick="verPDF('${pdf.id}')">📄 ${pdf.name}</div>`; });
+html += `</div><div id="pdf-viewer" style="width:100%; height:400px; margin-top:15px;"></div>`;
+visor.innerHTML = html;
+}
+function verPDF(id) { const viewer = document.getElementById('pdf-viewer'); if(viewer) viewer.innerHTML = `<embed src="https://drive.google.com/viewerng/viewer?embedded=true&url=https://drive.google.com/uc?id=${id}" width="100%" height="400" type="application/pdf">`; }
+window.onload = () => { precargarLista(); };
 </script>
 </body>
 </html>
